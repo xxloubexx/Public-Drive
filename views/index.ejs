@@ -1,18 +1,29 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Drive Public</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
+
 <body>
   <div class="container mt-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h1>Liste des dossiers et fichiers</h1>
       <a href="<%= adminPath %>" class="btn btn-primary">Modification</a>
     </div>
-    <div class="list-group">
+
+    <!-- Formulaire de recherche en temps réel -->
+    <input type="text" id="searchQuery" class="form-control mb-4" placeholder="Rechercher un fichier"
+      oninput="performSearch()" autocomplete="off">
+
+    <!-- Contenu des résultats de recherche -->
+    <div id="searchResults"></div>
+
+    <!-- Liste par défaut des dossiers et fichiers -->
+    <div id="defaultList" class="list-group">
       <% directories.forEach(function(directory) { %>
         <a href="/folder/<%= directory %>" class="list-group-item list-group-item-action">
           📁 <%= directory %>
@@ -25,5 +36,48 @@
       <% }); %>
     </div>
   </div>
+
+  <script>
+    async function performSearch() {
+      const query = document.getElementById('searchQuery').value;
+      const resultsContainer = document.getElementById('searchResults');
+      const defaultList = document.getElementById('defaultList');
+
+      // Si la requête est vide, on vide les résultats et affiche la liste par défaut
+      if (!query) {
+        resultsContainer.innerHTML = '';
+        defaultList.style.display = 'block';
+        return;
+      }
+
+      // Masquer la liste par défaut lors de la recherche
+      defaultList.style.display = 'none';
+
+      try {
+        // Envoi d'une requête AJAX au serveur
+        const response = await fetch(`/api/search?query=${encodeURIComponent(query)}`);
+        const results = await response.json();
+
+        // Affichage des résultats
+        let html = '';
+
+        if (results.files.length > 0) {
+          html += '<h3>Fichiers trouvés</h3><ul class="list-group">';
+          results.files.forEach(file => {
+            html += `<li class="list-group-item"><a href="/file/${file}">📄 ${file}</a></li>`;
+          });
+          html += '</ul>';
+        } else {
+          html = '<p>Aucun fichier trouvé</p>';
+        }
+
+        resultsContainer.innerHTML = html;
+      } catch (error) {
+        console.error('Erreur lors de la recherche:', error);
+        resultsContainer.innerHTML = '<p>Erreur lors de la recherche</p>';
+      }
+    }
+  </script>
 </body>
+
 </html>

@@ -85,6 +85,51 @@ app.get('/file/*', (req, res) => {
   handleFileRequest(req, res, filePath, folderName);
 });
 
+app.get('/api/search', async (req, res) => {
+  const query = req.query.query.toLowerCase(); // Convertir la recherche en minuscules pour l'insensibilité à la casse
+
+  try {
+    const { resultFiles } = await searchInDirectory(publicDir, query);
+
+    // Renvoyer les résultats au format JSON
+    res.json({
+      files: resultFiles // Renvoyer uniquement les fichiers
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Erreur lors de la recherche' });
+  }
+});
+
+async function searchInDirectory(dirPath, query) {
+  const resultFiles = [];
+
+  async function searchRecursive(currentPath) {
+    const items = await fs.readdir(currentPath);
+
+    for (const item of items) {
+      const itemPath = path.join(currentPath, item);
+      const stat = await fs.stat(itemPath);
+
+      if (stat.isDirectory()) {
+        await searchRecursive(itemPath); // Continue to search inside subdirectories
+      } else if (stat.isFile()) {
+        const fileName = item.toLowerCase();
+
+        // Vérifie si le nom du fichier contient la chaîne de recherche
+        if (fileName.includes(query)) {
+          resultFiles.push(path.relative(publicDir, itemPath));
+        }
+      }
+    }
+  }
+
+  await searchRecursive(dirPath);
+
+  return { resultFiles };
+}
+
+
+
 require('./adminRoutes')(app, adminPath);
 
 app.listen(PORT, () => {
