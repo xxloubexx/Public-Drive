@@ -109,7 +109,7 @@ module.exports = function (app) {
     const folderPath = path.join(__dirname, 'public', currentFolder, folderName);
 
     if (fs.existsSync(folderPath)) {
-      fs.rmSync(folderPath, { recursive: true });
+      fs.rmdirSync(folderPath, { recursive: true });
     }
 
     if (currentFolder) {
