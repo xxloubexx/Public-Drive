@@ -1,144 +1,92 @@
 const express = require('express');
-const fs = require('fs');
+const fs = require('fs').promises;
 const path = require('path');
 const mime = require('mime-types');
 const bodyParser = require('body-parser');
-const config = require('./config.json'); // Charger les informations de configuration
+const config = require('./config.json');
 
 const app = express();
 const PORT = config.port;
-const adminPath = config.adminPath; // Utiliser l'URL d'administration depuis config.json
-
-// Pour traiter les données de formulaire POST
-app.use(bodyParser.urlencoded({ extended: false }));
-
-// Définir le moteur de templates EJS
-app.set('view engine', 'ejs');
-
-// Définir le dossier public pour les fichiers statiques
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Définir le dossier public qui contient vos fichiers
+const adminPath = config.adminPath;
 const publicDir = path.join(__dirname, 'public');
 
-// Page d'accueil - Liste les dossiers et fichiers à la racine
-app.get('/', (req, res) => {
-  fs.readdir(publicDir, (err, files) => {
-    if (err) {
-      return res.status(500).send('Erreur lors de la lecture du dossier');
+app.use(bodyParser.urlencoded({ extended: false }));
+app.set('view engine', 'ejs');
+app.use(express.static(publicDir));
+
+async function getDirectoryContents(dirPath) {
+  const files = await fs.readdir(dirPath);
+  const directories = [];
+  const fileList = [];
+
+  for (const file of files) {
+    const filePath = path.join(dirPath, file);
+    const stat = await fs.stat(filePath);
+    if (stat.isDirectory()) {
+      directories.push(file);
+    } else if (stat.isFile()) {
+      fileList.push(file);
     }
+  }
 
-    const directories = [];
-    const fileList = [];
+  return { directories, fileList };
+}
 
-    files.forEach(file => {
-      const filePath = path.join(publicDir, file);
-      const stat = fs.statSync(filePath);
-
-      if (stat.isDirectory()) {
-        directories.push(file);
-      } else {
-        fileList.push(file);
-      }
-    });
-
-    res.render('index', { directories, fileList, adminPath }); // Ajoutez adminPath ici
-  });
+app.get('/', async (req, res) => {
+  try {
+    const { directories, fileList } = await getDirectoryContents(publicDir);
+    res.render('index', { directories, fileList, adminPath });
+  } catch (err) {
+    res.status(500).send('Erreur lors de la lecture du dossier');
+  }
 });
 
-// Route pour afficher le contenu d'un sous-dossier
-app.get('/folder/:folderName*', (req, res) => {
-    const folderName = req.params.folderName + (req.params[0] || '');
-    const folderPath = path.join(publicDir, folderName);
-  
-    fs.readdir(folderPath, (err, files) => {
-      if (err) {
-        return res.status(500).send('Erreur lors de la lecture du dossier');
-      }
-  
-      const directories = [];
-      const fileList = [];
-  
-      files.forEach(file => {
-        const filePath = path.join(folderPath, file);
-        const stat = fs.statSync(filePath);
-  
-        if (stat.isDirectory()) {
-          directories.push(file);
-        } else if (stat.isFile()) {
-          fileList.push(file);
-        }
-      });
-  
-      res.render('folder', { folderName, directories, fileList });
-    });
-  });
+app.get('/folder/:folderName*', async (req, res) => {
+  const folderName = req.params.folderName + (req.params[0] || '');
+  const folderPath = path.join(publicDir, folderName);
 
+  try {
+    const { directories, fileList } = await getDirectoryContents(folderPath);
+    res.render('folder', { folderName, directories, fileList });
+  } catch (err) {
+    res.status(500).send('Erreur lors de la lecture du dossier');
+  }
+});
 
-// Route pour lire un fichier
+async function handleFileRequest(req, res, filePath, folderName) {
+  const mimeType = mime.lookup(filePath);
+  const fileName = path.basename(filePath);
+
+  if (!await fs.access(filePath).then(() => true).catch(() => false)) {
+    return res.status(404).send('Fichier non trouvé');
+  }
+
+  if (mimeType === 'application/pdf') {
+    res.render('pdf', { fileName, folderName, filePath: `/${path.relative(publicDir, filePath)}` });
+  } else if (mimeType === 'text/plain') {
+    res.render('txt', { fileName, folderName, filePath: `/${path.relative(publicDir, filePath)}` });
+  } else {
+    res.setHeader('Content-Type', mimeType);
+    const data = await fs.readFile(filePath);
+    res.send(data);
+  }
+}
+
 app.get('/file/:folderName/:fileName', (req, res) => {
-    const folderName = req.params.folderName;
-    const fileName = req.params.fileName;
-    const filePath = path.join(publicDir, folderName, fileName);
-  
-    const mimeType = mime.lookup(filePath);
-  
-    if (mimeType === 'application/pdf') {
-      // Si c'est un fichier PDF, on l'affiche dans un iframe avec un template EJS
-      res.render('pdf', { fileName, folderName, filePath: `/${folderName}/${fileName}` });
-    } else if (mimeType === 'text/plain') {
-      // Si c'est un fichier .txt, on l'affiche aussi dans un iframe pour respecter les espaces
-      res.render('txt', { fileName, folderName, filePath: `/${folderName}/${fileName}` });
-    } else {
-      // Pour les autres types de fichiers, on les affiche normalement
-      res.setHeader('Content-Type', mimeType);
-      fs.readFile(filePath, (err, data) => {
-        if (err) {
-          return res.status(404).send('Fichier non trouvé');
-        }
-  
-        res.send(data);
-      });
-    }
-  });
-  
-// Route pour lire un fichier dans un sous-dossier
+  const { folderName, fileName } = req.params;
+  const filePath = path.join(publicDir, folderName, fileName);
+  handleFileRequest(req, res, filePath, folderName);
+});
+
 app.get('/file/*', (req, res) => {
-    const fullPath = req.params[0]; // Récupérer le chemin complet après '/file/'
-    const filePath = path.join(publicDir, fullPath); // Créer le chemin complet vers le fichier
-    const folderName = path.dirname(fullPath); // Récupérer le nom du dossier
-  
-    const mimeType = mime.lookup(filePath); // Déterminer le type MIME du fichier
-  
-    if (!fs.existsSync(filePath)) {
-      return res.status(404).send('Fichier non trouvé');
-    }
-  
-    if (mimeType === 'application/pdf') {
-      // Si c'est un fichier PDF, on l'affiche dans un iframe avec un template EJS
-      res.render('pdf', { fileName: path.basename(filePath), filePath: `/${fullPath}`, folderName });
-    } else if (mimeType === 'text/plain') {
-      // Si c'est un fichier .txt, on l'affiche dans un iframe pour respecter les espaces
-      res.render('txt', { fileName: path.basename(filePath), filePath: `/${fullPath}`, folderName });
-    } else {
-      // Pour les autres types de fichiers, on les affiche normalement
-      res.setHeader('Content-Type', mimeType);
-      fs.readFile(filePath, (err, data) => {
-        if (err) {
-          return res.status(500).send('Erreur lors de la lecture du fichier');
-        }
-  
-        res.send(data);
-      });
-    }
-  });
-  
-  
-  
-// Importation des routes d'administration
+  const fullPath = req.params[0];
+  const filePath = path.join(publicDir, fullPath);
+  const folderName = path.dirname(fullPath);
+  handleFileRequest(req, res, filePath, folderName);
+});
+
 require('./adminRoutes')(app, adminPath);
 
-// Lancement du serveur
 app.listen(PORT, () => {
   console.log(`Serveur démarré sur le port ${PORT}. Accédez à http://localhost:${PORT}`);
 });
