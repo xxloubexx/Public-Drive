@@ -1,0 +1,35 @@
+LDAP CLIENT
+
+apt install jxplorer -y
+
+Host: 10.1.10.1
+Level : User+Password
+User DN : cn=admin,dc=aforp,dc=org
+Password : P@ssw0rd!
+Save template pour gagner du temps 
+
+Créer un groupe :
+	Parent DN : dc=aforp,dc=org
+	Enter RDN : cn=users
+	Selected Classes :
+		- top
+		- posixGroup
+Enter gidNumber : 5000
+Submit
+
+Créer un user :
+	Parent DN : dc=aforp,dc=org
+	Enter RDN : cn=sgrey
+	Selected Classes :
+		- top
+		- posixAccount
+		- inetOrgPerson
+Il faut remplir d'autres attribut pour finaliser le profil :
+	gidNumber		: 45
+	homeDirectory		: /home/adam
+	cn 			: Sasha GREY
+	givenName		: Sasha
+	sn			: GREY
+	uid 			: adam
+	uidNumber		: 1501
+	userPassword		: Passw0rd$

@@ -1,0 +1,10 @@
+---
+- name: Create DNS record TYPE A 
+  hosts: PARDI01
+  tasks:
+   - name: Type A
+     community.windows.win_dns_record:
+     	 name: "PARDI01"
+	 type: "A"
+	 value: "10.30.0.1"
+     	 zone: "lyon2024.local"

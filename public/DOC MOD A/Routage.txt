@@ -1,0 +1,15 @@
+Routage a chaud :
+
+IPV4 :
+echo 1 > /proc/sys/net/ipv4/ip_forward
+IPV6 :
+echo 1 > /proc/sys/net/ipv6/conf/all/forwarding
+
+Routage permanent :
+
+/etc/sysctl.conf
+IPV4 :
+net.ipv4.ip_forward=1
+IPV6 :
+net.ipv6.conf.all.forwarding=1
+Pour valider : sysctl -p

@@ -1,0 +1,13 @@
+NTP :
+
+apt install ntp
+/etc/ntpsec/ntp.conf
+server 127.127.1.0 
+fudge 127.127.1.0 stratum 2
+
+Client NTP
+server 43.92.142.17
+
+systemctl restart ntpd
+
+ntpq -p <- commande pour verifier 

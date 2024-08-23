@@ -1,0 +1,68 @@
+OPENVPN
+
+ON RTR1 :
+/usr/share/easy-rsa/easyrsa gen-dh
+Generer aussi les certificats VPN SERVER et CLIENT
+for srv in vpn; do /usr/share/easy-rsa/easyrsa gen-req $srv.patiobrancion.com nopass ;/usr/share/easy-rsa/easyrsa sign-req server $srv.patiobrancion.com ;done
+
+for srv in vpnclient; do /usr/share/easy-rsa/easyrsa gen-req $srv.patiobrancion.com nopass ;/usr/share/easy-rsa/easyrsa sign-req client $srv.patiobrancion.com ;done
+
+ON DMZ1
+apt install openvpn
+cp /usr/share/doc/openvpn/examples/sample-config-files/server.conf /etc/openvpn/server/
+Mettre tout les certificats dans /etc/openvpn/server/ avec le dh.pem
+/etc/openvpn/server/server.conf
+Port 1194
+ca ca.crt
+cert vpn.patiobrancion.com.crt
+key vpn.patiobrancion.com.key
+dh dh.pem
+server 10.1.30.0 255.255.255.0
+push "route 10.1.10.0 255.255.255.0"
+push "route 10.1.20.0 255.255.255.0"
+push "route 10.1.30.0 255.255.255.0"
+push "dhcp-option DNS 10.1.10.1
+#ta.key
+
+ON CL_EXT
+apt install openvpn network-manager-openvpn-gnome -y
+cp /usr/share/doc/openvpn/examples/sample-config/files/client.conf /home/worldskills
+client.conf
+dev tun
+remote 10.1.20.1 1194
+ca /home/worldskills/ca.crt
+cert /home/worldskills/ca.crt
+key /home/worldskills/ca.crt
+#remote-cert-tls-server
+#cipher
+#tls-auth
+TOUT LES CERTIFICATS DOIVENT ETRE DANS CE DOSSIER -> /home/worldskills
+
+
+IF SUB-CA
+the file ca.crt need a ca and sub-ca in the same file
+-----BEGIN CERTIFICATE-----
+MIIEKjCCAxKgAwIBAgIEOGPe+DANBgkqhkiG9w0BAQUFADCBtDEUMBIGA1UEChML
+....
+Omitted for brevity
+....
+u/8j72gZyxKTJ1wDLW8w0B62GqzeWvfRqqgnpv55gcR5mTNXuhKwqeBCbJPKVt7+
+bYQLCIt+jerXmCHG8+c8eS9enNFMFY3h7CI3zJpDC5fcgJCNs2ebb0gIFVbPv/Er
+fF6adulZkMV8gzURZVE=
+-----END CERTIFICATE-----
+-----BEGIN CERTIFICATE-----
+MIIE9TCCA92gAwIBAgIETA6MOTANBgkqhkiG9w0BAQUFADCBtDEUMBIGA1UEChML
+....
+Omitted for brevity
+....
+mWEn7kVuxzn/9sWL4Mt8ih7VegcxKlJcOlAZOKlE+jyoz+95nWrZ5S6hjyko1+yq
+wfsm5p9GJKaxB825DOgNghYAHZaS/KYIoA==
+-----END CERTIFICATE-----
+
+
+IF ONLY WITH GNOME 
+You need a gateway !!
+/etc/NetworkManager/NetworkManager.conf
+[ifupdown]
+managed=true
+

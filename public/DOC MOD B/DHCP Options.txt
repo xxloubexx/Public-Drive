@@ -1,0 +1,16 @@
+DHCP :
+
+Install role DHCP Server 
+Standby mode : 
+Right click on the scope -> Configure failover -> add  server -> browse -> select the distant server 
+Mode : Hot Standby 
+Role of Partner Server : Standby
+unselect Enable message authentication
+Next-> Finish
+
+Load Balance mode : 
+Right click on the scope -> Configure failover -> add  server -> browse -> select the distant server 
+Mode : Load Balance
+Local Server & Partner Server : Choice your level of pourcentage
+unselect Enable message authentication
+Next-> Finish

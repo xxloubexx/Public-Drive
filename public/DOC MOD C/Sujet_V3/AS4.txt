@@ -1,0 +1,19 @@
+AS4
+
+en 
+conf t
+hostname AS4
+ip domain-name wsclyon2024.org
+enable password LyOn2024!
+
+service password-encryption
+clock timezone Paris 2
+username bgedalge privilege 15 secret ITNsa39
+spanning-tree mode rapid-pvst
+
+int range gi0/0
+spanning-tree bpduguard enable
+no sh
+exit
+ntp server 97.29.88.1
+do wr

@@ -1,0 +1,7 @@
+Install Remote Desktop Services
+
+Manage -> Add roles server features -> next -> Remote desktop services installation -> Quick start -> Session-based desktop deployment -> next -> select reboot -> deploy
+
+RDS create a Website IIS
+
+Go in IIS and change the certificate with a certificate web server

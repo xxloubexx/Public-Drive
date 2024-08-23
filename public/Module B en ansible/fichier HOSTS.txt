@@ -1,0 +1,16 @@
+---
+all:
+  hosts:
+    PARDI01:
+      ansible_host: 10.30.0.1
+      hostname: "PARDI01TEST"
+    PARDI02:
+      ansible_host: 10.30.0.16
+      hostname: "PARDI02"
+  children:
+    addomain:
+      hosts:
+	PARDI01:
+    clientdomain:
+      hosts:
+	PARDI02:

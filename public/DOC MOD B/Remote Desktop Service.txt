@@ -1,0 +1,20 @@
+Remote Desktop Service
+Configure PARDI03 as RD Broker and RD Session Host
+
+Install Role Remote Desktop Services -> Connection Broker & Session Host
+For install the service -> add roles and features -> next -> Remote Desktop Services Installation 
+Quick Start -> Session-based deployment -> next -> Select the case restart -> deploy
+
+Configure a Remote App collection and publish Wordpad
+Server Manager -> Remote Desktop Services -> QuickSession Collections
+RemoteApp Program -> Tasks -> unpublish remoteapp programs -> select apps 
+
+Only “Remote Apps Users” are allowed to use this collection.
+Server Manager -> Remote Desktop Services -> QuickSession Collections
+Properties -> tasks -> edit properties -> user groups -> add (is a domain local group )
+Remove all users 
+
+All domain users can access to this collection with a web browser at remoteapp.lyon2024.wsc in https.
+When you install this role, he create a website automatically 
+Select default web site in IIS 
+Edit in bindings and add a certificate web server with the same name of site (here ->remoteapp.lyon2024.wsc)

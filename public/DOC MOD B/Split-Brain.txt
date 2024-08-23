@@ -1,0 +1,8 @@
+Split-Brain
+Active NAT on server exposed on Internet
+Enable dns with port 53 UDP to private address 10.10.0.10
+Powershell on server DNS private :
+Add-DnsServerZoneScope -ZoneName "lyon2024.wsc" -Name "LYONWSC"
+Add-DnsServerResourceRecord -ZoneName "lyon2024.wsc" -A -Name "remoteapp" -IPv4Address "10.20.0.11" -ZoneScope "LYONWSC"
+Add-DnsServerClientSubnet -Name "Exchange" -IPv4Subnet "20.0.0.0/24" -PassThru
+Add-DnsServerQueryResolutionPolicy -Name "Remoteapp" -Action ALLOW -ClientSubnet "eq,Exchange" -ZoneScope "LYONWSC" -ZoneName "lyon2024.wsc"

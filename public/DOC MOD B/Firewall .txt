@@ -1,0 +1,11 @@
+Firewall :
+
+Configure PARDI01(20.0.0.2) and LYREM01(20.0.0.3) to accept only ICMP traffic. ICMP traffic from LASRV01(20.0.0.1) should be denied.
+- PARDI01 :
+Inbound Rule -> Custom -> All programs -> Protocol Type ICMPv4 -> Local IP address 20.0.0.2 | Remote IP Address 20.0.0.1 -> block the connection -> Next -> Finish
+- PARDI01 :
+Inbound Rule -> Custom -> All programs -> Protocol Type ICMPv4 -> Local IP address 20.0.0.2 | Remote IP Address 20.0.0.3 -> allow the connection -> Next -> Finish
+- LYREM01 :
+Inbound Rule -> Custom -> All programs -> Protocol Type ICMPv4 -> Local IP address 20.0.0.3 | Remote IP Address 20.0.0.1 -> block the connection -> Next -> Finish
+- LYREM01 :
+Inbound Rule -> Custom -> All programs -> Protocol Type ICMPv4 -> Local IP address 20.0.0.3 | Remote IP Address 20.0.0.3 -> allow the connection -> Next -> Finish

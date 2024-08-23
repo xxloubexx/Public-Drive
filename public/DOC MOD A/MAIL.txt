@@ -1,0 +1,24 @@
+MAIL
+
+apt install postfix
+/etc/postfix/main.cf
+smtpd_tls_cert_file=/home/worldskills/smtp.crt
+smtpd_tls_key_file=/home/worldskills/smtp.key
+smtpd_tls_CApath=/home/worldskills
+mydestination= DMZ2.patiobrancion.com #remplacer $myhostname et l'ecrire en dur
+mynetworks = 0.0.0.0/0
+
+/etc/postfix/master.cf
+submission inet n #decommenter cette ligne
+
+apt install dovecot-imapd
+/etc/dovecot/conf.d/10-auth.conf
+disable_plaintext_auth = no
+
+/etc/dovecot/dovecot.conf
+protocols = imap
+ssl_cert = </home/worldskills/imap.crt
+ssl_key = </home/worldskills/imap.key
+
+Ajouter enregistrement DNS
+@ IN MX 10 dmz2.patiobrancion.com

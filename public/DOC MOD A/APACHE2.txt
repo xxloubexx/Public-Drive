@@ -1,0 +1,51 @@
+APACHE2
+
+---------------DMZ1-------------------
+
+apt install apache2
+/var/www/html/index.html
+Welcome admin!
+/etc/apache2/sites-available/default-ssl.conf
+<VirtualHost *:3900>
+ServerName admin.patiobrancion.com
+SSLCertificateFile /home/worldskills/admin.patiobrancion.com.crt
+SSLCertificateKeyFile /home/worldskills/admin.patiobrancion.com.key
+SSLCACertificateFile /home/worldskills/ca.crt
+    <Location />
+        AuthType Basic
+        AuthName "Restricted Content"
+        AuthUserFile /etc/apache2/.htpasswd
+        Require valid-user
+    </Location>
+/etc/apache2/ports.conf
+<IfModule ssl_module>
+	Listen 443
+	Listen 3900
+</IfModule>
+a2dissite 000-default.conf
+a2ensite default-ssl.conf
+a2enmod ssl
+htpasswd -c /etc/apache2/.htpasswd admin
+
+systemctl restart apache2
+
+cp /etc/apache2/sites-available/000-default.conf /etc/apache2/sites-available/home.conf
+/etc/apache2/sites-available/home.conf
+ServerName home.patiobrancion.com
+DocumentRoot /var/www/home
+a2ensite home.conf
+mkdir /var/www/home
+echo "Welcome admin!" > /var/www/home/index.html
+systemctl restart apache2
+---------------DMZ2-------------------
+apt install apache2
+/etc/apache2/sites-available/000-default.conf 
+ServerName room.patiobrancion.com
+echo "Check our beautiful rooms on this page!" > /var/www/home/index.html
+systemctl restart apache2
+---------------DMZ3-------------------
+apt install apache2
+/etc/apache2/sites-available/000-default.conf 
+ServerName book.patiobrancion.com
+echo "You can book your room here!" > /var/www/home/index.html
+systemctl restart apache2

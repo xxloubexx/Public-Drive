@@ -1,0 +1,28 @@
+---
+- name: Create Groups
+  hosts: addomain
+  tasks: 
+  - name: Create Group Management 
+    community.windows.win_domain_group:
+      name: Management
+      path: OU=Management,DC=lyon2024,DC=local
+      scope: global
+      category: security
+  - name: Create Group IT-Experts 
+    community.windows.win_domain_group:
+      name: IT-Experts
+      path: OU=IT-Experts,DC=lyon2024,DC=local
+      scope: global
+      category: security
+  - name: Create Group Controlling 
+    community.windows.win_domain_group:
+      name: Controlling
+      path: OU=Controlling,DC=lyon2024,DC=local 
+      scope: global
+      category: security
+  - name: Create Group Staff
+    community.windows.win_domain_group:
+      name: Staff
+      path: OU=Staff,DC=lyon2024,DC=local
+      scope: global
+      category: security

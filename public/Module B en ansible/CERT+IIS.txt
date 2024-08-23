@@ -1,0 +1,79 @@
+---
+- name: Setup AD CS, create Web Server certificate template, and configure IIS with the certificate
+  hosts: addomain
+  become: yes
+  tasks:
+    - name: Install Windows Feature AD CS
+      community.windows.win_feature:
+        name: AD-Certificate
+        state: present
+        include_management_tools: yes
+
+    - name: Install Windows Feature AD CS Certification Authority
+      community.windows.win_feature:
+        name: ADCS-Cert-Authority
+        state: present
+        include_management_tools: yes
+
+    - name: Install Windows Feature IIS
+      community.windows.win_feature:
+        name: Web-Server
+        state: present
+        include_management_tools: yes
+
+    - name: Start the Web Management Service
+      community.windows.win_service:
+        name: WMSVC
+        start_mode: auto
+        state: started
+
+    - name: Create a Web Server certificate template
+      community.windows.win_powershell:
+        script: |
+          $template = Get-CATemplate | Where-Object {$_.Name -eq "Web Server"}
+          if ($template -eq $null) {
+              $template = Get-CATemplate | Where-Object {$_.Name -eq "WebServer"}
+              if ($template -eq $null) {
+                  Write-Error "Web Server template not found"
+              } else {
+                  $template.DisplayName = "Web Server"
+                  Set-CATemplate -InputObject $template
+              }
+          }
+      register: template_output
+
+    - name: Issue the Web Server certificate template
+      community.windows.win_powershell:
+        script: |
+          certutil -setcaTemplate +WebServer
+
+    - name: Request a certificate using the Web Server template
+      community.windows.win_powershell:
+        script: |
+          certreq -submit -attrib "CertificateTemplate:WebServer" -policyserver "ldap:///CN=CertificateAuthority,CN=Public Key Services,CN=Services,CN=Configuration,DC=lyon2024,DC=local" -config "CAName\CAName" -enroll WebServer.req WebServer.cer
+      register: cert_request_output
+
+    - name: Import the certificate into the local machine's store
+      community.windows.win_certificate_store:
+        name: C:\certs\WebServer.cer
+        state: present
+        store_name: My
+
+    - name: Bind SSL certificate to the Default Web Site
+      community.windows.win_iis_webbinding:
+        name: "Default Web Site"
+        protocol: https
+        port: 443
+        certificate_hash: "{{ cert_request_output.stdout | regex_findall('[0-9a-fA-F]{40}') | first }}"
+        certificate_store_name: My
+
+    - name: Create and configure a new website
+      community.windows.win_iis_website:
+        name: "ExampleSite"
+        state: started
+        port: 443
+        ip: '*'
+        hostname: "www.example.com"
+        application_pool: "DefaultAppPool"
+        physical_path: "C:\\inetpub\\wwwroot\\example"
+

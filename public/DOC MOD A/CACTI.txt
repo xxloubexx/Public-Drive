@@ -1,0 +1,32 @@
+CACTI
+
+Ajout d'un engistrement DNS cacti
+
+apt install cacti php -y
+
+Configure database for cacti with dbconfig-common -> yes
+P@ssw0rd!
+P@ssw0rd!
+apache2
+
+
+/etc/apache2/sites-enable/000-default.conf
+ServerName cacti.patiobrancion.com
+DocumentRoot /usr/share/cacti/site
+RedirectMatch ^$ /cacti/
+
+
+On HOST monitoring 
+apt install snmp snmpd -y
+/etc/snmp/snmpd.conf
+createUser cactiUser SHA P@ssw0rd! AES P@ssw0rd!
+rouser cactiUser
+service snmpd restart
+
+
+On cacti.patiobrancion.com
+admin P@ssw0rd!
+Create un device : Create -> New Device 
+- Description : DMZ1
+- Hostname : 10.1.20.1
+Downed Device Detection -> Ping

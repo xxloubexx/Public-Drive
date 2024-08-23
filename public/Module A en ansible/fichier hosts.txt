@@ -1,0 +1,5 @@
+all_linux:
+  hosts:
+    DMZ1:
+      ansible_host: 10.30.0.20
+      hostname: "DMZ1"

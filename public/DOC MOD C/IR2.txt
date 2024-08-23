@@ -1,0 +1,54 @@
+IR2
+
+en
+conf t
+hostname IR2
+ip domain-name wsclyon2024.net
+enable password Lyon2024
+service password-encryption
+clock timezone Paris 2
+int gi0/1
+ip address 33.87.4.1 255.255.255.252
+no sh
+exit
+int gi0/2
+ip address 80.0.0.2 255.255.255.252
+no sh
+exit
+int gi0/3
+ip address 201.9.2.1 255.255.255.252
+no sh
+exit
+router ospf 1
+network 33.87.4.0 0.0.0.3 area 10
+network 201.9.2.0 0.0.0.3 area 10
+exit
+router bgp 65002
+network 80.0.0.0 mask 255.255.255.252
+neighbor 80.0.0.1 remote-as 65000
+exit
+interface Tunnel0
+ ip address 14.0.0.2 255.255.255.0
+ no ip redirects
+ ip mtu 1400
+ ip nhrp authentication DMVPN
+ ip nhrp map 14.0.0.1 70.0.0.2
+ ip nhrp map multicast 70.0.0.2
+ ip nhrp network-id 1
+ ip nhrp nhs 14.0.0.1
+ tunnel source GigabitEthernet0/2
+ tunnel mode gre multipoint
+ exit
+do wr
+
+access-list 1 permit any
+ip nat inside source list 1 interface gi0/2 overload
+int gi0/3
+ip nat inside
+exit
+int gi0/1
+ip nat inside
+exit
+int gi0/2
+ip nat outside
+exit

@@ -1,0 +1,117 @@
+--------------CONFIGURATION ANSIBLE POUR CLIENT LINUX-----------
+apt install ansible python3-full
+mkdir /home/worldskills/ansible
+vim hosts
+all:
+  hosts:
+      DMZ4:
+        ansible_host: 10.1.20.4
+        hostname: "DMZ4-TEST"
+ansible-config init --disabled > ansible.cfg
+vim ansible.cfg -> ligne 137 decommenter la ligne et mettre l'endroit ou reside notre fichier hosts
+vim credentials.yaml -> P@ssw0rd!
+ssh-keygen
+ssh-copy-id root@10.1.20.4
+
+ansible DMZ4 -m ping -> Le résultat doit etre "pong"
+
+
+
+
+---
+- name: Change hostname
+  hosts: DMZ4
+  tasks: 
+    - name: Changement de nom
+      ansible.builtin.hostname:
+        name: "DMZ4"
+      register: ok
+    - name: Reboot  
+      reboot:
+      when: ok.changed
+
+
+
+
+--------------CONFIGURATION ANSIBLE POUR CLIENT LINUX-----------
+
+
+/home/debian/ansible/group_vars/all.yaml
+
+ansible_connection:winrm
+ansible_user: administrator
+ansible_password: P@ssw0rd
+ansible_winrm_server_cert_validation: ignore
+
+
+ansible PARDI01 -m win_ping
+
+playbook : 
+
+---
+-name: Change hostname   
+ hosts: all
+ tasks: 
+  - name: Changement du nom 
+    ansible.windows.win_hostname:
+      name: "{{ hostname }}"
+    register: ok
+  - name: Reboot
+    ansible.windows.win_reboot:
+    when: ok.reboot_required
+
+--------------CONFIGURATION ANSIBLE POUR EQUIPEMENT CISCO-----------
+
+
+Sur le router cisco : 
+
+crypto key generate rsa -> 2048 bits
+ip ssh version 2
+line vty 0 4
+transport input ssh
+login local
+exit
+user carotte secret carotte privilege 15
+apt install ansible python3-full python3-paramiko
+
+vim hosts
+all:
+  hosts:
+    BR2:
+	ansible_ssh_user: 'carotte'
+	ansible_ssh_pass: 'carotte'
+	ansible_connection: network_cli
+	ansible_network_os: cisco.ios.ios
+	ansible_host: '172.16.50.1'
+	hostname: "BR2"
+
+ansible.cfg
+host_key_checking = False
+[ssh_connection]
+ssh_args = -oPubKeyAcceptedAlgorithms=+ssh-rsa -oHostKeyAlgorithms=+ssh-rsa
+
+playbook :
+
+---
+-name: Change hostname   
+ hosts: BR2
+ tasks: 
+  - name: Changement du nom 
+    ios_config:
+    	  lines: hostname BR2TEST
+- name: Configure domain name
+  ios_config:
+        lines: ip domain-name test.example.com
+- name: Create lookpback
+  ios_config:
+        lines: 
+	  - int lo1
+	  - ip address 8.8.8.8 255.255.255.255
+          - no sh
+
+
+
+
+
+
+

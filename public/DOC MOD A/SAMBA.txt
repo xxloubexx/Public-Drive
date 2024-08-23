@@ -1,0 +1,31 @@
+SAMBA
+adduser admin
+apt install samba
+/etc/samba/smb.conf
+# Partage privé accessible en R/W seulement par admin
+[private]
+   path = /data/private
+   valid users = admin
+   read only = no
+   browsable = yes
+   writable = yes
+   create mask = 0770
+   directory mask = 0770
+
+# Partage accessible en R/W par tout le monde
+[websites]
+   path = /data/websites
+   read only = no
+   browsable = yes
+   guest ok = yes
+   writable = yes
+   create mask = 0777
+   directory mask = 0777
+
+sudo mkdir -p /data/private
+sudo mkdir -p /data/websites
+# Assurez-vous que le répertoire privé appartient à l'utilisateur admin
+sudo chown admin:admin /data/private
+# Définissez les permissions pour les répertoires
+sudo chmod 700 /data/private
+sudo chmod 777 /data/websites

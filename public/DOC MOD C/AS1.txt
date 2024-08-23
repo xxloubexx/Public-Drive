@@ -1,0 +1,52 @@
+AS1
+en
+conf t
+hostname AS1
+ip domain-name wsclyon2024.net
+enable password Lyon2024
+user lebarbanchon privilege 15 password Skill39
+service password-encryption
+clock timezone Paris 2
+
+int vlan 10
+ip address 172.16.10.3 255.255.255.240
+no sh
+exit
+int vlan 20
+ip address 172.16.20.3 255.255.255.224
+no sh
+exit
+int gi0/0
+switchport trunk encapsulation dot1q
+switchport mode trunk
+no sh
+exit
+int gi0/1
+switchport trunk encapsulation dot1q
+switchport mode trunk
+no sh
+exit
+int gi0/2
+switchport mode access
+switchport access vlan 20
+no sh
+exit
+int gi0/3
+switchport mode access
+switchport access vlan 10
+no sh
+exit
+
+spanning-tree mode rapid-pvst
+int gi0/2
+spanning-tree bpduguard enable
+exit
+int gi0/3
+spanning-tree bpduguard enable
+exit
+vtp domain wsclyon2024.net
+vtp version 2
+vtp mode client
+no ip routing
+ip default-gateway 172.16.20.1
+do wr

@@ -1,0 +1,24 @@
+---
+- name: IPTABLES
+  hosts: DMZ1
+  become: yes #permet de lancer des commandes en root
+  tasks:
+    - name: Installation du paquet IPTABLES
+      ansible.builtin.package:
+	name: iptables
+	state: present
+    - name: Block specific IP
+      ansible.builtin.iptables:
+        chain: INPUT
+        source: 8.8.8.8
+        jump: DROP
+    - name: Forward port 80 to 8600 - NAT
+      ansible.builtin.iptables:
+        table: nat
+        chain: PREROUTING
+        in_interface: eth0
+        protocol: tcp
+        match: tcp
+        destination_port: 80
+        jump: REDIRECT
+        to_ports: 8600

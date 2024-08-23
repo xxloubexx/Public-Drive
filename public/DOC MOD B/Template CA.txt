@@ -1,0 +1,35 @@
+Copy Computer Template 
+
+Compatibility -> Windows Server 2016
+General -> Name of template / Select Publish certificate in Active Directory / 
+request Handling -> Allow private key to be exported / Renew with the same key
+Security -> add the pc hosting the CA (Read) / Remove Authenticated Users / Domain Computer (Read/Enroll/AutoEnroll) / Domain Controller (Read/Enroll/AutoEnroll)
+Apply
+
+Right click on certificate template -> New -> Certificate template to issue
+
+
+Create GPO for autoenroll all computer 
+
+Computer Configuration -> Policies -> Windows Settings -> Security Settings -> Public Key Policies -> Certificate Services Client - Certificate Enrollment Policy = Enabled -> Apply
+Computer Configuration -> Policies -> Windows Settings -> Security Settings -> Public Key Policies -> Certificate Services Client - Auto-Enrollment = Enabled / Select 1st & 2nd line -> Apply
+
+
+----------------------
+
+Copy Computer Template 
+
+Compatibility -> Windows Server 2016
+General -> Name of template / Select Publish certificate in Active Directory / 
+request Handling -> Allow private key to be exported / Renew with the same key
+Security -> add the pc hosting the CA (Read) / Remove Authenticated Users / Domain Admin (Read/Enroll/AutoEnroll) / Domain Users (Read/Enroll/AutoEnroll)
+Apply
+
+Right click on certificate template -> New -> Certificate template to issue
+
+
+
+Create GPO for autoenroll all users
+
+Users Configuration -> Policies -> Windows Settings -> Security Settings -> Public Key Policies -> Certificate Services Client - Certificate Enrollment Policy = Enabled -> Apply
+Users Configuration -> Policies -> Windows Settings -> Security Settings -> Public Key Policies -> Certificate Services Client - Auto-Enrollment = Enabled / Select 1st & 2nd line -> Apply

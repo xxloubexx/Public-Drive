@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Affichage du fichier texte : <%= fileName %></title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    /* Applique 100% de la hauteur à body et html */
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
+
+    /* Flexbox pour une mise en page flexible */
+    .container {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    /* Zone pour le bouton centré */
+    .header {
+      background-color: #f8f9fa;
+      text-align: center;
+      padding: 10px 0;
+    }
+
+    /* L'iframe doit occuper tout l'espace disponible */
+    .txt-viewer {
+      flex: 1;
+      width: 100%;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Section avec le bouton retour au centre -->
+    <div class="header">
+      <a href="/folder/<%= folderName %>" class="btn btn-primary">Retour au dossier</a>
+    </div>
+
+    <!-- Texte occupe tout l'espace restant -->
+    <iframe class="txt-viewer" src="/<%= folderName %>/<%= fileName %>"></iframe>
+  </div>
+</body>
+</html>

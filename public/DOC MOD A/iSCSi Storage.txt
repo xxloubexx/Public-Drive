@@ -1,0 +1,27 @@
+iSCSi Storage
+
+apt install targetcli-fb
+fdisk -l
+fdisk /dev/sdb
+mkfs.ext4 /dev/sdb1
+targetcli
+/backstores/block create name=webstorage dev=/dev/sdb1
+/iscsi create iqn.2024-08.com.pationbrancion:webstorage
+/iscsi/iqn.2024-08.com.pationbrancion:webstorage/tpg1/luns create /backstores/block/webstorage
+/iscsi/iqn.2024-08.com.pationbrancion:webstorage/tpg1 set attribute authentication=1
+/iscsi/iqn.2024-08.com.pationbrancion:webstorage/tpg1/acls create iqn.2024-08.com.pationbrancion:webclient
+/iscsi/iqn.2024-08.com.pationbrancion:webstorage/tpg1/acls/iqn.2024-08.com.pationbrancion:webclient set auth userid=webclient
+/iscsi/iqn.2024-08.com.pationbrancion:webstorage/tpg1/acls/iqn.2024-08.com.pationbrancion:webclient set auth password=P@sswOrd!
+exit
+systemctl enable targetclid.service
+
+ON CLIENTS :
+apt install open-iscsi
+/etc/iscsi/iscsid.conf
+node.startup = automatic
+node.session.auth.authmethod = CHAP
+node.session.auth.username = webclient
+node.session.auth.password = P@sswOrd!
+discovery.sendtargets.auth.authmethod = CHAP
+discovery.sendtargets.auth.username = webclient
+discovery.sendtargets.auth.password = P@sswOrd!

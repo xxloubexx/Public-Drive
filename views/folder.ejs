@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contenu du dossier : <%= folderName %></title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+  <div class="container mt-5">
+    <h1>Contenu du dossier : <%= folderName %></h1>
+
+    <!-- Bouton "Retour au dossier parent" si on est dans un sous-dossier -->
+    <% if (folderName) { %>
+        <a href="<%= folderName.includes('/') ? '/folder/' + folderName.split('/').slice(0, -1).join('/') : '/' %>" class="btn btn-secondary mb-4">Retour au dossier parent</a>
+    <% } %>
+
+    <!-- Liste des dossiers -->
+    <h3>Dossiers</h3>
+    <ul class="list-group mb-4">
+      <% directories.forEach(function(directory) { %>
+        <li class="list-group-item">
+          <a href="/folder/<%= folderName ? folderName + '/' + directory : directory %>">
+            📁 <%= directory %>
+          </a>
+        </li>
+      <% }); %>
+    </ul>
+
+    <!-- Liste des fichiers -->
+    <h3>Fichiers</h3>
+    <ul class="list-group">
+      <% fileList.forEach(function(file) { %>
+        <li class="list-group-item">
+          <a href="/file/<%= folderName %>/<%= file %>">📄 <%= file %></a>
+        </li>
+      <% }); %>
+    </ul>
+  </div>
+</body>
+</html>

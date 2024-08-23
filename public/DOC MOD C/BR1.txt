@@ -1,0 +1,46 @@
+BR1
+
+en
+conf t
+hostname BR1
+ip domain-name wsclyon2024.net
+enable password Lyon2024
+service password-encryption
+clock timezone Paris 2
+int gi0/1.40
+encapsulation dot1q 40
+ip address 172.16.40.1 255.255.255.224
+no sh
+exit
+int gi0/2
+ip address 60.0.0.2 255.255.255.252
+no sh
+exit
+do wr
+router bgp 65003
+network 60.0.0.0 mask 255.255.255.252
+neighbor 60.0.0.1 remote-as 65000
+exit
+
+access-list 1 permit any
+ip nat inside source list 1 interface gi0/2 overload
+int gi0/1.40
+ip nat inside
+exit
+int gi0/2
+ip nat outside
+exit
+
+interface Tunnel0
+ ip address 14.0.0.3 255.255.255.0
+ no ip redirects
+ ip mtu 1400
+ ip nhrp authentication DMVPN
+ ip nhrp map 14.0.0.1 70.0.0.2
+ ip nhrp map multicast 70.0.0.2
+ ip nhrp network-id 1
+ ip nhrp nhs 14.0.0.1
+ tunnel source GigabitEthernet0/2
+ tunnel mode gre multipoint
+ exit
+do wr

@@ -1,0 +1,41 @@
+#################PREPARATION DU CLIENT WINDOWS##################
+Client Windows
+WinRM QuickConfig
+y
+
+WinRM enumerate winrm/config/Listener
+
+Lancer le script ConfigureRemotingForAnsible.ps1 (disponible sur internet)
+
+#################PREPARATION DU SERVER ANSIBLE##################
+Linux
+apt install ansible python3-full -y
+
+Il faut créer un dossier /home/worldskills/ansible
+Dans ce dossier on doit y trouver les fichiers et dossiers :
+ansible.cfg credentials.yaml /group_vars hosts /playbook vars
+vim hosts ->
+---------------
+---
+all:
+  hosts:
+      PARDI01: #LE NOM DE LA VARIABLE
+        ansible_host: 10.30.0.1
+        hostname: "PARDI01" #LE NOM QUE L'ON SOUHAITE
+ansible-config init --disabled > ansible.cfg
+---------------
+vim ansible.cfg -> ligne 137 décommenter la ligne et mettre l'endroit ou reside notre fichier hosts
+vim credentials.yaml -> P@ssw0rd!
+/home/debian/ansible/group_vars/all.yaml
+---------------
+ansible_connection: winrm
+ansible_user: administrator
+ansible_password: P@ssw0rd!
+ansible_winrm_server_cert_validation: ignore
+----------------
+
+ansible PARDI01 -m win_ping
+
+Pour lancer un playbook, il faut faire la commande : ansible-playbook "nom du playbook"
+
+

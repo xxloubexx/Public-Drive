@@ -1,0 +1,37 @@
+NAT
+
+
+nft add table nat
+nft add chain nat prerouting { type nat hook prerouting priority -100 \;}
+
+
+###DNS vers DMZ2
+nft add rule nat prerouting ip daddr 43.92.142.17 udp dport 53 dnat to 10.1.20.2:53
+
+###– DMZ1 / DMZ2 / DMZ3 Should be accessible with SSH from External on port 2021 / 2022 /2023
+nft add rule nat prerouting ip daddr 43.92.142.17 tcp dport 2021 dnat to 10.1.20.1:2021
+nft add rule nat prerouting ip daddr 43.92.142.17 tcp dport 2022 dnat to 10.1.20.2:2022
+nft add rule nat prerouting ip daddr 43.92.142.17 tcp dport 2023 dnat to 10.1.20.3:2023
+
+###Port 3900 ext vers DMZ1 3900
+nft add rule nat prerouting ip daddr 43.92.142.17 tcp dport 3900 dnat to 10.1.20.1:3900
+
+###VPN Port 1194 ext vers DMZ1 1194
+nft add rule nat prerouting ip daddr 43.92.142.17 udp dport 1194 dnat to 10.1.20.1:1194
+
+###WEBMAIL EXT vers DMZ2 
+nft add rule nat prerouting ip daddr 43.92.142.17 tcp dport 25 dnat to 10.1.20.2:25
+nft add rule nat prerouting ip daddr 43.92.142.17 tcp dport 587 dnat to 10.1.20.2:587
+nft add rule nat prerouting ip daddr 43.92.142.17 tcp dport 465 dnat to 10.1.20.2:465
+nft add rule nat prerouting ip daddr 43.92.142.17 tcp dport 143 dnat to 10.1.20.2:143
+nft add rule nat prerouting ip daddr 43.92.142.17 tcp dport 993 dnat to 10.1.20.2:993
+
+##Lister les regles NAT
+nft -a list table nat
+
+##Supprimer une regle
+nft delete rule nat prerouting handle 5
+
+
+Enregistrer la configuration permanent : 
+nft list ruleset > /etc/nftables.conf

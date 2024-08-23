@@ -1,0 +1,30 @@
+NGINX
+apt install nginx
+cp /etc/nginx/sites-enabled/default /etc/nginx/sites-enabled/welcome
+listen 443 ssl;
+root /data/websites/aforp
+servername welcome.aforp.org
+ssl_certificate /home/worldskills/welcome.crt;
+ssl_certificate_key /home/worldskills/welcome.key;
+systemctl restart nginx
+
+
+LOAD BALANCING
+
+/etc/nginx/nginx.conf
+http{
+	upstream backend {
+		random;
+		server 10.1.20.2:80;
+		server 10.1.20.3:80;
+	}
+	server {
+	listen 443 ssl;
+	ssl_certificate /home/worldskills/all.crt;
+	ssl_certificate_key /home/worldskills/all.key;
+	location / { 
+	  proxy_pass http://backend;
+	}
+	}
+}
+	

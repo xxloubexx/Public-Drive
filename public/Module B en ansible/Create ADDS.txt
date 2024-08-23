@@ -1,0 +1,12 @@
+---
+- name: Create new domain
+  hosts: addomain
+  tasks: 
+   - name: Create AD
+     ansible.windows.win_domain:
+         dns_domain_name: lyon2024.local
+         safe_mode_password: P@ssw0rd!
+     register: ok
+   - name: Reboot
+     ansible.windows.win_reboot:
+     when: ok.reboot_required

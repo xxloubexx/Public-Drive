@@ -1,0 +1,43 @@
+ISP
+
+en
+conf t
+hostname ISP
+ip domain-name wsclyon2024.net
+enable password Lyon2024
+service password-encryption
+clock timezone Paris 2
+
+int gi0/0
+ip address 90.0.0.1 255.255.255.252
+no sh
+exit
+int gi0/1
+ip address 60.0.0.1 255.255.255.252
+no sh
+exit
+int gi0/2
+ip address 50.0.0.1 255.255.255.252
+no sh
+exit
+int gi0/3
+ip address 70.0.0.1 255.255.255.252
+no sh
+exit
+int gi0/4
+ip address 80.0.0.1 255.255.255.252
+no sh
+exit
+do wr
+router bgp 65000
+network 50.0.0.0 mask 255.255.255.252
+network 60.0.0.0 mask 255.255.255.252
+network 70.0.0.0 mask 255.255.255.252
+network 80.0.0.0 mask 255.255.255.252
+network 90.0.0.0 mask 255.255.255.252
+neighbor 70.0.0.2 remote-as 65001
+neighbor 80.0.0.2 remote-as 65002
+neighbor 60.0.0.2 remote-as 65003
+neighbor 50.0.0.2 remote-as 65004
+exit
+do wr

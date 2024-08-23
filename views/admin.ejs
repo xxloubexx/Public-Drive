@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panneau d'administration</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+  <div class="container mt-5">
+    <h1>Administration du dossier : <%= currentFolder || 'Racine' %></h1>
+
+    <!-- Bouton de retour à l'accueil -->
+    <a href="/" class="btn btn-secondary mb-4">Retour à l'accueil</a>
+
+    <!-- Bouton "Retour" vers le dossier parent si on est dans un sous-dossier -->
+    <% if (currentFolder) { %>
+        <a href="<%= currentFolder.includes('/') ? config.adminPath + '/folder/' + currentFolder.split('/').slice(0, -1).join('/') : config.adminPath %>" class="btn btn-secondary mb-4">Retour au dossier parent</a>
+    <% } %>
+  
+    <form action="<%= config.adminPath %>/upload-file" method="POST" enctype="multipart/form-data">
+        <!-- Transmettre le chemin complet du sous-dossier -->
+        <input type="hidden" name="currentFolder" value="<%= currentFolder %>"> 
+        <div class="form-group">
+          <label for="fileUpload">Choisir un fichier à uploader :</label>
+          <input type="file" name="fileUpload" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Uploader</button>
+    </form>      
+
+    <!-- Formulaire pour créer un nouveau dossier -->
+    <h3>Créer un dossier</h3>
+    <form action="<%= config.adminPath %>/create-folder" method="POST">
+        <!-- Transmettre le chemin complet du sous-dossier -->
+        <input type="hidden" name="currentFolder" value="<%= currentFolder %>"> 
+        <div class="form-group">
+          <label for="folderName">Nom du nouveau dossier :</label>
+          <input type="text" name="folderName" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-success">Créer</button>
+    </form>
+         
+    <hr>
+
+    <!-- Liste des dossiers -->
+    <h3>Dossiers</h3>
+    <ul class="list-group">
+      <% directories.forEach(function(directory) { %>
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <!-- Lien pour naviguer dans le dossier -->
+          <div>
+            <a href="<%= config.adminPath %>/folder/<%= currentFolder ? currentFolder + '/' + directory : directory %>">
+              📁 <%= directory %>
+            </a>
+          </div>
+
+          <!-- Actions pour renommer et supprimer le dossier -->
+          <div>
+            <!-- Formulaire pour renommer un dossier -->
+            <form action="<%= config.adminPath %>/rename-folder" method="POST" class="d-inline">
+              <input type="hidden" name="currentFolder" value="<%= currentFolder %>">
+              <input type="hidden" name="oldFolderName" value="<%= directory %>">
+              <input type="text" name="newFolderName" placeholder="Nouveau nom" class="form-control-sm" required>
+              <button type="submit" class="btn btn-primary btn-sm">Renommer</button>
+            </form>
+
+            <!-- Formulaire pour supprimer un dossier -->
+            <form action="<%= config.adminPath %>/delete-folder" method="POST" class="d-inline">
+              <input type="hidden" name="currentFolder" value="<%= currentFolder %>">
+              <input type="hidden" name="folderName" value="<%= directory %>">
+              <button type="submit" class="btn btn-danger btn-sm">Supprimer</button>
+            </form>
+          </div>
+        </li>
+      <% }); %>
+    </ul>
+
+    <hr>
+
+    <!-- Liste des fichiers -->
+    <h3>Fichiers</h3>
+    <ul class="list-group">
+      <% fileList.forEach(function(file) { %>
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <!-- Afficher le nom du fichier -->
+          📄 <%= file %>
+
+          <!-- Actions pour renommer et supprimer le fichier -->
+          <div>
+            <!-- Formulaire pour renommer un fichier -->
+            <form action="<%= config.adminPath %>/rename-file" method="POST" class="d-inline">
+              <input type="hidden" name="currentFolder" value="<%= currentFolder %>">
+              <input type="hidden" name="oldFileName" value="<%= file %>">
+              <input type="text" name="newFileName" placeholder="Nouveau nom" class="form-control-sm" required>
+              <button type="submit" class="btn btn-primary btn-sm">Renommer</button>
+            </form>
+
+            <!-- Formulaire pour supprimer un fichier -->
+            <form action="<%= config.adminPath %>/delete-file" method="POST" class="d-inline">
+              <input type="hidden" name="currentFolder" value="<%= currentFolder %>">
+              <input type="hidden" name="fileName" value="<%= file %>">
+              <button type="submit" class="btn btn-danger btn-sm">Supprimer</button>
+            </form>
+          </div>
+        </li>
+      <% }); %>
+    </ul>
+
+  </div>
+</body>
+</html>

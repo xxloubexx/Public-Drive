@@ -1,0 +1,23 @@
+GPO : 
+
+Disable First Sign-in all clients :
+Computer -> Policies -> Administrative Template -> System -> Logon -> Show first sign-in animation (Disabled)
+
+Members of IT-Experts group must be members of the local admin group on all computers in the domain :
+Computer -> Preferences -> Control Panel Settings -> Local Users and Groups 
+Action : Update
+Groups names : Administrators (built-in)
+Members : LYON2024\IT-Experts
+
+Disable Control Panel for all users except local admin on every client :
+Users -> Policies -> Administratorive Template -> Control Panel
+Prohibit access to Control Panel and PC settings (enabled)
+
+Create a GPO only for Lyon AD site to deploy a desktop shortcut pointing to www.branch.lyon2024.wsc website :
+User -> Preferences -> Windows Settings -> Shortcuts 
+Action : Update
+Target Type : URL
+Location : Desktop
+Target URL : https://www.branch.lyon2024.wsc
+Go in Sites -> LYON -> Right Click -> Link an Existing GPO -> Select this GPO
+Select the original GPO -> Link Enabled -> Disabled

@@ -1,0 +1,53 @@
+CR4
+
+en
+conf t
+hostname CR4
+ip domain-name wsclyon2024.net
+enable password Lyon2024
+service password-encryption
+clock timezone Paris 2
+int gi0/1
+ip address 33.87.4.2 255.255.255.252
+no sh
+exit
+int gi0/2
+ip address 192.168.20.2 255.255.255.252
+no sh
+exit
+int gi0/3
+ip address 10.30.10.1 255.255.255.252
+no sh
+exit
+int gi0/4
+ip address 15.15.15.1 255.255.255.252
+no sh
+exit
+int gi0/5
+ip address 192.168.2.2 255.255.255.252
+no sh
+exit
+router ospf 1
+redistribute ospf 2 subnet
+network 192.168.20.0 0.0.0.3 area 10
+network 10.30.10.0 0.0.0.3 area 10
+network 15.15.15.0 0.0.0.3 area 10
+network 33.87.4.0 0.0.0.3 area 10
+router-id 1.1.1.6
+exit
+router ospf 2
+redistribute ospf 1 subnet
+network 192.168.2.0 0.0.0.3 area 200
+exit
+ip sla 1
+icmp-echo 33.87.4.1
+frequency 10
+timeout 5000
+exit
+ip sla schedule 1 life forever start-time now
+ track 1 ip sla 1 reachability
+ip route 0.0.0.0 0.0.0.0 33.87.4.1 track 1
+ip route 0.0.0.0 0.0.0.0 192.168.2.1 20
+
+
+do wr

@@ -1,0 +1,25 @@
+Host specific FSMO Role 
+Take example Infrastructure Master
+
+Select your server would be host the FSMO role
+Active Directory Users and Computers
+Right Click on Active Directory Users and Computers
+All tasks -> Operations Masters
+Selection Infrastructure -> Click on change
+
+
+Create Sites and Subnet :
+
+Active Directory Sites and Services 
+Rename the Default-First-Site-Name on LYON
+Create Site PARIS 
+Right Click on Subnet -> New Subnet 
+Prefix -> Your subnet and select the good site
+
+Change default OU for join new Computer : 
+
+redircmp "OU=LYON2024-COMPUTER,DC=LYON2024,DC=LOCAL"
+
+Change default OU for join new Users  : 
+
+redirusr "OU=LYON2024-USERS,DC=LYON2024,DC=LOCAL"

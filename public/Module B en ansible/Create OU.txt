@@ -1,0 +1,16 @@
+---
+- name: Create OU
+  hosts: addomain
+  tasks: 
+  - name: Create OU Management 
+    community.windows.win_domain_ou:
+      name: Management
+  - name: Create OU IT-Experts 
+    community.windows.win_domain_ou:
+      name: IT-Experts 
+  - name: Create OU Controlling 
+    community.windows.win_domain_ou:
+      name: Controlling 
+  - name: Create OU Staff
+    community.windows.win_domain_ou:
+      name: Staff

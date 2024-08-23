@@ -1,0 +1,40 @@
+---
+- name: Create DNS record TYPE A 
+  hosts: addomain
+  tasks:
+   - name: Type A
+     community.windows.win_dns_record:
+     	 name: "PARCO01"
+	 type: "A"
+	 value: "10.10.0.10"
+     	 zone: "lyon2024.local"
+- name: Create DNS record TYPE CNAME 
+  hosts: addomain
+  tasks:
+   - name: Type CNAME
+     community.windows.win_dns_record:
+         name: PARCOTEST
+	 type: "CNAME"
+	 value: "PARCO01.lyon2024.local"
+     	 zone: "lyon2024.local"
+- name: Create DNS record TYPE PTR 
+  hosts: addomain
+  tasks:
+   - name: Type PTR
+     community.windows.win_dns_record:
+     	 name: "10"
+	 type: "PTR"
+	 value: "PARCO01.lyon2024.local."
+     	 zone: "0.10.10.in-addr.arpa"
+
+
+- name: Remove DNS record TYPE CNAME 
+  hosts: addomain
+  tasks:
+   - name: Type CNAME
+     community.windows.win_dns_record:
+         name: PARCOTEST
+	 type: "CNAME"
+	 state: absent
+	 #value: "PARCO01.lyon2024.local"
+     	 zone: "lyon2024.local"

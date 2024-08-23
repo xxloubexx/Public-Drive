@@ -1,0 +1,11 @@
+---
+- name: Change hostname
+  hosts: DMZ1
+  tasks: 
+    - name: Changement de nom
+      ansible.builtin.hostname:
+        name: "DMZ1"
+      register: ok
+    - name: Reboot  
+      reboot:
+      when: ok.changed

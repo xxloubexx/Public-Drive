@@ -1,0 +1,14 @@
+VPN SSL 
+
+Server : 
+
+Generate Certificate Web Server with a good name : vpn.lyon2024.wsc
+
+Client :
+
+Import the same certificate
+Create a new connection VPN
+Connection Name : vpn
+Server name or address : vpn.wsc2024.wsc
+VPN Type : Secure Socket Tunneling Protocol (SSTP)
+Type or sign-in info : Username and Password

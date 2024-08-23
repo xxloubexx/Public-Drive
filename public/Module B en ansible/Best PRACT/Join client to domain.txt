@@ -1,0 +1,23 @@
+---
+- name: Set a DNS on the adapter named Ethernet
+  hosts: PARDI01
+  tasks:
+   - name: Set a DNS
+     ansible.windows.win_dns_client:
+     adapter_names: Ethernet
+     dns_servers: 10.10.0.10
+
+- name: Join client to domain
+  hosts: PARDI01
+  tasks:
+    - name: Join client to domain
+      ansible.windows.win_domain_membership:
+          dns_domain_name: lyon2024.local
+          hostname: PARDI01
+          domain_admin_user: Administrator@lyon2024.local
+          domain_admin_password: P@ssw0rd!
+	  state: domain
+      register: ok
+    - name: Reboot host after domain join
+      ansible.windows.win_reboot:
+      when: ok.reboot_required

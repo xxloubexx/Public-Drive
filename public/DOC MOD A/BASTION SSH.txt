@@ -1,0 +1,9 @@
+BASTION SSH
+
+Ajout d'un enregistrement DNS bastion.patiobrancion.com
+
+/etc/ssh/sshd_config
+Port 2222
+GatewayPorts yes
+
+systemctl restart ssh

@@ -1,0 +1,104 @@
+DHCP :
+
+apt install isc-dhcp-server
+/etc/dhcp/dhcpd.conf
+
+    subnet 43.92.142.16 netmask 255.255.255.248 {
+	range 43.92.142.18 43.92.142.20;
+        option domain-name "patiobrancion.org";
+	option domain-name-servers 43.92.142.17;
+        option routers 43.92.142.17;
+        default-lease-time 600;
+	    max-lease-time 7200;
+	}
+	
+	host CL_EXT {
+		hardware ethernet <address mac du client>;
+		fixed-address 43.92.142.19;
+	}
+
+/etc/default/isc-dhcp-server
+INTERFACESv4="ens192" <- c'est l'interface qui enverra les paquets dhcp
+
+subnet6 2001:db8:1001:10::/64 {
+    range6 2001:db8:1001:10::20 2001:db8:1001:10::30;
+    option dhcp6.name-servers 2001:db8:1001:10::1; 
+    option dhcp6.domain-search "aforp.org";
+}
+
+/etc/default/isc-dhcp-server
+INTERFACESv6="ens192" <- c'est l'interface qui enverra les paquets dhcp
+
+
+Scope Partner : 
+
+ - Server primaire : 
+
+failover peer "failover" {
+  primary;                        # Indique que ce serveur est le primaire
+  address <IP_DHCP1>;             # Adresse IP du serveur primaire
+  port 647;                       # Port par défaut pour le basculement
+  peer address <IP_DHCP2>;        # Adresse IP du serveur secondaire
+  peer port 647;                  # Port par défaut pour le basculement sur le serveur secondaire
+  max-response-delay 30;          # Délai max pour les réponses (en secondes)
+  max-unacked-updates 10;         # Nombre max de mises à jour non acquittées
+  mclt 3600;                      # Maximum Client Lead Time
+  split 128;                      # Équilibrage de la charge
+}
+
+subnet 43.92.142.16 netmask 255.255.255.248 {
+        option domain-name "patiobrancion.org";
+	option domain-name-servers 43.92.142.17;
+        option routers 43.92.142.17;
+        default-lease-time 600;
+	max-lease-time 7200;
+	pool {
+		failover peer "failover";
+		range 43.92.142.18 43.92.142.20;
+		host CL_EXT {
+		hardware ethernet <address mac du client>;
+		fixed-address 43.92.142.19;
+		}
+
+	}
+}
+	
+ - Server secondaire : 
+
+failover peer "failover" {
+  secondary;                        # Indique que ce serveur est le secondaire
+  address <IP_DHCP2>;             # Adresse IP du serveur primaire
+  port 647;                       # Port par défaut pour le basculement
+  peer address <IP_DHCP1>;        # Adresse IP du serveur primaire
+  peer port 647;                  # Port par défaut pour le basculement sur le serveur secondaire
+  max-response-delay 30;          # Délai max pour les réponses (en secondes)
+  max-unacked-updates 10;         # Nombre max de mises à jour non acquittées
+  mclt 3600;                      # Maximum Client Lead Time
+  split 128;                      # Équilibrage de la charge
+}
+
+subnet 43.92.142.16 netmask 255.255.255.248 {
+        option domain-name "patiobrancion.org";
+	option domain-name-servers 43.92.142.17;
+        option routers 43.92.142.17;
+        default-lease-time 600;
+	max-lease-time 7200;
+	pool {
+		failover peer "failover";
+		range 43.92.142.18 43.92.142.20;
+		host CL_EXT {
+		hardware ethernet <address mac du client>;
+		fixed-address 43.92.142.19;
+		}
+
+	}
+}
+
+
+
+
+
+
+
+
+
