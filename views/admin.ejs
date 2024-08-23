@@ -65,7 +65,7 @@
             </form>
 
             <!-- Formulaire pour supprimer un dossier -->
-            <form action="<%= config.adminPath %>/delete-folder" method="POST" class="d-inline">
+            <form action="<%= config.adminPath %>/delete-folder" method="POST" class="d-inline" onsubmit="confirmDelete(event, 'folder')">
               <input type="hidden" name="currentFolder" value="<%= currentFolder %>">
               <input type="hidden" name="folderName" value="<%= directory %>">
               <button type="submit" class="btn btn-danger btn-sm">Supprimer</button>
@@ -96,7 +96,7 @@
             </form>
 
             <!-- Formulaire pour supprimer un fichier -->
-            <form action="<%= config.adminPath %>/delete-file" method="POST" class="d-inline">
+            <form action="<%= config.adminPath %>/delete-file" method="POST" class="d-inline" onsubmit="confirmDelete(event, 'file')">
               <input type="hidden" name="currentFolder" value="<%= currentFolder %>">
               <input type="hidden" name="fileName" value="<%= file %>">
               <button type="submit" class="btn btn-danger btn-sm">Supprimer</button>
@@ -107,5 +107,15 @@
     </ul>
 
   </div>
+  <script>
+    function confirmDelete(event, type) {
+      event.preventDefault();
+      const name = event.target.querySelector('input[name="folderName"], input[name="fileName"]').value;
+      const confirmMessage = `Êtes-vous sûr de vouloir supprimer ${type === 'folder' ? 'le dossier' : 'le fichier'} "${name}" ?`;
+      if (confirm(confirmMessage)) {
+        event.target.submit();
+      }
+    }
+  </script>
 </body>
 </html>

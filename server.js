@@ -42,7 +42,7 @@ app.get('/', (req, res) => {
       }
     });
 
-    res.render('index', { directories, fileList });
+    res.render('index', { directories, fileList, adminPath }); // Ajoutez adminPath ici
   });
 });
 

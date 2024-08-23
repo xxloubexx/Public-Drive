@@ -8,7 +8,10 @@
 </head>
 <body>
   <div class="container mt-5">
-    <h1 class="mb-4">Liste des dossiers et fichiers</h1>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1>Liste des dossiers et fichiers</h1>
+      <a href="<%= adminPath %>" class="btn btn-primary">Modification</a>
+    </div>
     <div class="list-group">
       <% directories.forEach(function(directory) { %>
         <a href="/folder/<%= directory %>" class="list-group-item list-group-item-action">
