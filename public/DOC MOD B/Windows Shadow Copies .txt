@@ -1,5 +1,0 @@
-Windows Shadow Copies 
-
-Right click on D:\ -> properties -> shadow copies 
-Select D:\ -> settings -> choice your located volume 
-If you need a Schedule -> Schedule 

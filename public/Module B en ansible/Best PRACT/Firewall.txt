@@ -1,7 +1,0 @@
----
-- name: Créer une règle de pare-feu sur un serveur Windows
-  hosts: PARDI01
-  tasks:
-    - name: Ajouter une règle de pare-feu pour autoriser le trafic HTTP
-      win_shell: |
-        New-NetFirewallRule -Name "Allow_HTTP_Traffic" -DisplayName "Allow_HTTP_Traffic"  -Description "Autorise le trafic HTTP entrant sur le port 80" -Action "Allow" -Direction "Inbound" -Protocol "TCP" -LocalPort "80" -RemotePort "Any" -Enabled "True"

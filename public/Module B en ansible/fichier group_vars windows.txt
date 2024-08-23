@@ -1,4 +1,0 @@
-ansible_connection: winrm
-ansible_user: Administrator
-ansible_password: P@ssw0rd!
-ansible_winrm_server_cert_validation: ignore

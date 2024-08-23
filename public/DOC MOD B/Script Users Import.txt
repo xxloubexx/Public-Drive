@@ -1,9 +1,0 @@
-$users = Import-Csv -Path "C:\Users\Administrator\Desktop\users.csv" -Delimiter ","
-
-foreach ($user in $users) {
-$OU = "OU="+$user.group+",DC=lyon2024,DC=local"
-$name=$user.first_name+" "+$user.last_name
-$password = (ConvertTo-SecureString "P@ssw0rd!" -AsplainText -Force)
-$upn = $user.upn+"@lyon2024.local"
-New-ADuser -Name $name -AccountPassword $password -DisplayName -EmailAddress $user.email -Enabled $true -GivenName $user.first_name -OfficePhone $user.phone -Path $OU -SamAccountName $user.upn -Surname $user.last_name -UserPrincipalName $upn
-}
