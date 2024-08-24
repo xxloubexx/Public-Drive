@@ -24,7 +24,11 @@ async function getDirectoryContents(folderPath) {
   for (const file of files) {
     const filePath = path.join(folderPath, file);
     const stat = await fs.stat(filePath);
-    (stat.isDirectory() ? directories : fileList).push(file);
+    if (stat.isDirectory()) {
+      directories.push(file);
+    } else {
+      fileList.push(file);
+    }
   }
 
   return { directories, fileList };

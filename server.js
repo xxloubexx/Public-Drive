@@ -47,7 +47,7 @@ app.get('/folder/:folderName*', async (req, res) => {
 
   try {
     const { directories, fileList } = await getDirectoryContents(folderPath);
-    res.render('folder', { folderName, directories, fileList });
+    res.render('folder', { folderName, directories, fileList, adminPath });
   } catch (err) {
     res.status(500).send('Erreur lors de la lecture du dossier');
   }
@@ -72,10 +72,16 @@ async function handleFileRequest(req, res, filePath, folderName) {
   }
 }
 
-app.get('/file/:folderName/:fileName', (req, res) => {
-  const { folderName, fileName } = req.params;
-  const filePath = path.join(publicDir, folderName, fileName);
-  handleFileRequest(req, res, filePath, folderName);
+app.get('/folder/:folderName*', async (req, res) => {
+  const folderName = req.params.folderName + (req.params[0] || '');
+  const folderPath = path.join(publicDir, folderName);
+
+  try {
+    const { directories, fileList } = await getDirectoryContents(folderPath);
+    res.render('folder', { folderName, directories, fileList, adminPath });
+  } catch (err) {
+    res.status(500).send('Erreur lors de la lecture du dossier');
+  }
 });
 
 app.get('/file/*', (req, res) => {
@@ -88,9 +94,10 @@ app.get('/file/*', (req, res) => {
 app.get('/api/search', async (req, res) => {
   const query = req.query.query.toLowerCase();
   const searchType = req.query.searchType;
+  const folder = req.query.folder || '';
 
   try {
-    const resultFiles = await searchInDirectory(publicDir, query, searchType);
+    const resultFiles = await searchInDirectory(publicDir, query, searchType, folder);
     res.json({ files: resultFiles });
   } catch (err) {
     console.error('Erreur lors de la recherche:', err);
@@ -98,8 +105,9 @@ app.get('/api/search', async (req, res) => {
   }
 });
 
-async function searchInDirectory(dirPath, query, searchType) {
+async function searchInDirectory(dirPath, query, searchType, folder = '') {
   const resultFiles = [];
+  const startPath = path.join(dirPath, folder);
 
   async function searchRecursive(currentPath) {
     const items = await fs.readdir(currentPath);
@@ -112,15 +120,15 @@ async function searchInDirectory(dirPath, query, searchType) {
         await searchRecursive(itemPath);
       } else if (stat.isFile()) {
         const fileName = item.toLowerCase();
-        const relativePath = path.relative(publicDir, itemPath).replace(/\\/g, '/');
+        const relativePath = path.relative(startPath, itemPath).replace(/\\/g, '/');
 
         if (searchType === 'filename' && fileName.includes(query)) {
-          resultFiles.push(relativePath);
+          resultFiles.push(path.join(folder, relativePath));
         } else if (searchType === 'content' && path.extname(fileName) === '.txt') {
           try {
             const content = await fs.readFile(itemPath, 'utf-8');
             if (content.toLowerCase().includes(query)) {
-              resultFiles.push(relativePath);
+              resultFiles.push(path.join(folder, relativePath));
             }
           } catch (error) {
             console.error(`Erreur lors de la lecture du fichier ${itemPath}:`, error);
@@ -130,7 +138,7 @@ async function searchInDirectory(dirPath, query, searchType) {
     }
   }
 
-  await searchRecursive(dirPath);
+  await searchRecursive(startPath);
   return resultFiles;
 }
 

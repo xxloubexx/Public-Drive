@@ -8,34 +8,119 @@
 </head>
 <body>
   <div class="container mt-5">
-    <h1>Contenu du dossier : <%= folderName %></h1>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1>Contenu du dossier : <%= folderName %></h1>
+      <a href="<%= adminPath %>/folder/<%= folderName %>" class="btn btn-primary">Modification</a>
+    </div>
 
-    <!-- Bouton "Retour au dossier parent" si on est dans un sous-dossier -->
-    <% if (folderName) { %>
-        <a href="<%= folderName.includes('/') ? '/folder/' + folderName.split('/').slice(0, -1).join('/') : '/' %>" class="btn btn-secondary mb-4">Retour au dossier parent</a>
-    <% } %>
+    <!-- Barre de recherche -->
+    <div class="mb-4">
+      <input type="text" id="searchQuery" class="form-control mb-2" placeholder="Rechercher dans ce dossier" autocomplete="off">
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="searchType" id="searchFilename" value="filename" checked>
+        <label class="form-check-label" for="searchFilename">Recherche par nom de fichier</label>
+      </div>
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="searchType" id="searchContent" value="content">
+        <label class="form-check-label" for="searchContent">Recherche dans le contenu</label>
+      </div>
+    </div>
 
-    <!-- Liste des dossiers -->
-    <h3>Dossiers</h3>
-    <ul class="list-group mb-4">
-      <% directories.forEach(function(directory) { %>
-        <li class="list-group-item">
-          <a href="/folder/<%= folderName ? folderName + '/' + directory : directory %>">
-            📁 <%= directory %>
-          </a>
-        </li>
-      <% }); %>
-    </ul>
+    <!-- Contenu des résultats de recherche -->
+    <div id="searchResults"></div>
 
-    <!-- Liste des fichiers -->
-    <h3>Fichiers</h3>
-    <ul class="list-group">
-      <% fileList.forEach(function(file) { %>
-        <li class="list-group-item">
-          <a href="/file/<%= folderName %>/<%= file %>">📄 <%= file %></a>
-        </li>
-      <% }); %>
-    </ul>
+    <!-- Boutons de navigation -->
+    <div class="mb-4">
+      <a href="/" class="btn btn-primary mr-2">Retour à l'accueil</a>
+      <% if (folderName) { %>
+        <a href="<%= folderName.includes('/') ? '/folder/' + folderName.split('/').slice(0, -1).join('/') : '/' %>" class="btn btn-secondary">Retour au dossier parent</a>
+      <% } %>
+    </div>
+
+    <!-- Liste par défaut des dossiers et fichiers -->
+    <div id="defaultList">
+      <!-- Liste des dossiers -->
+      <h3>Dossiers</h3>
+      <ul class="list-group mb-4">
+        <% directories.forEach(function(directory) { %>
+          <li class="list-group-item">
+            <a href="/folder/<%= folderName ? folderName + '/' + directory : directory %>">
+              📁 <%= directory %>
+            </a>
+          </li>
+        <% }); %>
+      </ul>
+
+      <!-- Liste des fichiers -->
+      <h3>Fichiers</h3>
+      <ul class="list-group">
+        <% fileList.forEach(function(file) { %>
+          <li class="list-group-item">
+            <a href="/file/<%= folderName %>/<%= file %>">📄 <%= file %></a>
+          </li>
+        <% }); %>
+      </ul>
+    </div>
   </div>
+
+  <script>
+    let searchTimeout;
+
+    function debounce(func, wait) {
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(searchTimeout);
+          func(...args);
+        };
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(later, wait);
+      };
+    }
+
+    async function performSearch() {
+      const query = document.getElementById('searchQuery').value;
+      const searchType = document.querySelector('input[name="searchType"]:checked').value;
+      const resultsContainer = document.getElementById('searchResults');
+      const defaultList = document.getElementById('defaultList');
+
+      if (!query) {
+        resultsContainer.innerHTML = '';
+        defaultList.style.display = 'block';
+        return;
+      }
+
+      defaultList.style.display = 'none';
+      resultsContainer.innerHTML = '<p>Recherche en cours...</p>';
+
+      try {
+        const response = await fetch(`/api/search?query=${encodeURIComponent(query)}&searchType=${searchType}&folder=<%= encodeURIComponent(folderName) %>`);
+        const results = await response.json();
+
+        let html = '';
+
+        if (results.files.length > 0) {
+          html += '<h3>Fichiers trouvés</h3><ul class="list-group">';
+          results.files.forEach(file => {
+            html += `<li class="list-group-item"><a href="/file/${file}">📄 ${file}</a></li>`;
+          });
+          html += '</ul>';
+        } else {
+          html = '<p>Aucun fichier trouvé</p>';
+        }
+
+        resultsContainer.innerHTML = html;
+      } catch (error) {
+        console.error('Erreur lors de la recherche:', error);
+        resultsContainer.innerHTML = '<p>Erreur lors de la recherche</p>';
+      }
+    }
+
+    const debouncedSearch = debounce(performSearch, 300);
+
+    document.getElementById('searchQuery').addEventListener('input', debouncedSearch);
+    document.querySelectorAll('input[name="searchType"]').forEach(radio => {
+      radio.addEventListener('change', performSearch);
+    });
+  </script>
 </body>
 </html>
