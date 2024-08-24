@@ -86,21 +86,19 @@ app.get('/file/*', (req, res) => {
 });
 
 app.get('/api/search', async (req, res) => {
-  const query = req.query.query.toLowerCase(); // Convertir la recherche en minuscules pour l'insensibilité à la casse
+  const query = req.query.query.toLowerCase();
+  const searchType = req.query.searchType;
 
   try {
-    const { resultFiles } = await searchInDirectory(publicDir, query);
-
-    // Renvoyer les résultats au format JSON
-    res.json({
-      files: resultFiles // Renvoyer uniquement les fichiers
-    });
+    const resultFiles = await searchInDirectory(publicDir, query, searchType);
+    res.json({ files: resultFiles });
   } catch (err) {
+    console.error('Erreur lors de la recherche:', err);
     res.status(500).json({ error: 'Erreur lors de la recherche' });
   }
 });
 
-async function searchInDirectory(dirPath, query) {
+async function searchInDirectory(dirPath, query, searchType) {
   const resultFiles = [];
 
   async function searchRecursive(currentPath) {
@@ -111,21 +109,29 @@ async function searchInDirectory(dirPath, query) {
       const stat = await fs.stat(itemPath);
 
       if (stat.isDirectory()) {
-        await searchRecursive(itemPath); // Continue to search inside subdirectories
+        await searchRecursive(itemPath);
       } else if (stat.isFile()) {
         const fileName = item.toLowerCase();
+        const relativePath = path.relative(publicDir, itemPath).replace(/\\/g, '/');
 
-        // Vérifie si le nom du fichier contient la chaîne de recherche
-        if (fileName.includes(query)) {
-          resultFiles.push(path.relative(publicDir, itemPath));
+        if (searchType === 'filename' && fileName.includes(query)) {
+          resultFiles.push(relativePath);
+        } else if (searchType === 'content' && path.extname(fileName) === '.txt') {
+          try {
+            const content = await fs.readFile(itemPath, 'utf-8');
+            if (content.toLowerCase().includes(query)) {
+              resultFiles.push(relativePath);
+            }
+          } catch (error) {
+            console.error(`Erreur lors de la lecture du fichier ${itemPath}:`, error);
+          }
         }
       }
     }
   }
 
   await searchRecursive(dirPath);
-
-  return { resultFiles };
+  return resultFiles;
 }
 
 

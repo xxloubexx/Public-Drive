@@ -16,8 +16,18 @@
     </div>
 
     <!-- Formulaire de recherche en temps réel -->
-    <input type="text" id="searchQuery" class="form-control mb-4" placeholder="Rechercher un fichier"
-      oninput="performSearch()" autocomplete="off">
+    <div class="mb-4">
+      <input type="text" id="searchQuery" class="form-control mb-2" placeholder="Rechercher un fichier"
+        autocomplete="off">
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="searchType" id="searchFilename" value="filename" checked>
+        <label class="form-check-label" for="searchFilename">Recherche par nom de fichier</label>
+      </div>
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="searchType" id="searchContent" value="content">
+        <label class="form-check-label" for="searchContent">Recherche dans le contenu</label>
+      </div>
+    </div>
 
     <!-- Contenu des résultats de recherche -->
     <div id="searchResults"></div>
@@ -38,27 +48,38 @@
   </div>
 
   <script>
+    let searchTimeout;
+
+    function debounce(func, wait) {
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(searchTimeout);
+          func(...args);
+        };
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(later, wait);
+      };
+    }
+
     async function performSearch() {
       const query = document.getElementById('searchQuery').value;
+      const searchType = document.querySelector('input[name="searchType"]:checked').value;
       const resultsContainer = document.getElementById('searchResults');
       const defaultList = document.getElementById('defaultList');
 
-      // Si la requête est vide, on vide les résultats et affiche la liste par défaut
       if (!query) {
         resultsContainer.innerHTML = '';
         defaultList.style.display = 'block';
         return;
       }
 
-      // Masquer la liste par défaut lors de la recherche
       defaultList.style.display = 'none';
+      resultsContainer.innerHTML = '<p>Recherche en cours...</p>';
 
       try {
-        // Envoi d'une requête AJAX au serveur
-        const response = await fetch(`/api/search?query=${encodeURIComponent(query)}`);
+        const response = await fetch(`/api/search?query=${encodeURIComponent(query)}&searchType=${searchType}`);
         const results = await response.json();
 
-        // Affichage des résultats
         let html = '';
 
         if (results.files.length > 0) {
@@ -77,6 +98,13 @@
         resultsContainer.innerHTML = '<p>Erreur lors de la recherche</p>';
       }
     }
+
+    const debouncedSearch = debounce(performSearch, 300);
+
+    document.getElementById('searchQuery').addEventListener('input', debouncedSearch);
+    document.querySelectorAll('input[name="searchType"]').forEach(radio => {
+      radio.addEventListener('change', performSearch);
+    });
   </script>
 </body>
 
