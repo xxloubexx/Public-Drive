@@ -4,15 +4,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Drive Public</title>
+  <title>Public Drive</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 
 <body>
   <div class="container mt-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
-      <h1>Liste des dossiers et fichiers</h1>
-      <a href="<%= adminPath %>" class="btn btn-primary">Modification</a>
+      <h1>List of folders and files</h1>
+      <a href="<%= adminPath %>" class="btn btn-primary">Modify</a>
     </div>
 
     <!-- Formulaire de recherche en temps réel -->
@@ -21,11 +21,11 @@
         autocomplete="off">
       <div class="form-check form-check-inline">
         <input class="form-check-input" type="radio" name="searchType" id="searchFilename" value="filename" checked>
-        <label class="form-check-label" for="searchFilename">Recherche par nom de fichier</label>
+        <label class="form-check-label" for="searchFilename">File name research</label>
       </div>
       <div class="form-check form-check-inline">
         <input class="form-check-input" type="radio" name="searchType" id="searchContent" value="content">
-        <label class="form-check-label" for="searchContent">Recherche dans le contenu</label>
+        <label class="form-check-label" for="searchContent">File content research</label>
       </div>
     </div>
 
@@ -74,7 +74,7 @@
       }
 
       defaultList.style.display = 'none';
-      resultsContainer.innerHTML = '<p>Recherche en cours...</p>';
+      resultsContainer.innerHTML = '<p>Search in progress...</p>';
 
       try {
         const response = await fetch(`/api/search?query=${encodeURIComponent(query)}&searchType=${searchType}`);
@@ -83,19 +83,19 @@
         let html = '';
 
         if (results.files.length > 0) {
-          html += '<h3>Fichiers trouvés</h3><ul class="list-group">';
+          html += '<h3>Files found</h3><ul class="list-group">';
           results.files.forEach(file => {
             html += `<li class="list-group-item"><a href="/file/${file}">📄 ${file}</a></li>`;
           });
           html += '</ul>';
         } else {
-          html = '<p>Aucun fichier trouvé</p>';
+          html = '<p>No file found</p>';
         }
 
         resultsContainer.innerHTML = html;
       } catch (error) {
-        console.error('Erreur lors de la recherche:', error);
-        resultsContainer.innerHTML = '<p>Erreur lors de la recherche</p>';
+        console.error('Error during research:', error);
+        resultsContainer.innerHTML = '<p>Error during research</p>';
       }
     }
 

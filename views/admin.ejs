@@ -8,33 +8,33 @@
 </head>
 <body>
   <div class="container mt-5">
-    <h1>Administration du dossier : <%= currentFolder || 'Racine' %></h1>
+    <h1>Folder administration: <%= currentFolder || 'Root folder' %></h1>
 
     <!-- Bouton de retour à l'accueil -->
-    <a href="/" class="btn btn-primary mb-4">Retour à l'accueil</a>
+    <a href="/" class="btn btn-primary mb-4">Back to home page</a>
 
     <!-- Bouton "Retour" vers le dossier parent si on est dans un sous-dossier -->
     <% if (currentFolder) { %>
-        <a href="<%= currentFolder.includes('/') ? config.adminPath + '/folder/' + currentFolder.split('/').slice(0, -1).join('/') : config.adminPath %>" class="btn btn-secondary mb-4">Retour au dossier parent</a>
+        <a href="<%= currentFolder.includes('/') ? config.adminPath + '/folder/' + currentFolder.split('/').slice(0, -1).join('/') : config.adminPath %>" class="btn btn-secondary mb-4">Back to parent folder</a>
     <% } %>
   
     <form action="<%= config.adminPath %>/upload-file" method="POST" enctype="multipart/form-data">
         <!-- Transmettre le chemin complet du sous-dossier -->
         <input type="hidden" name="currentFolder" value="<%= currentFolder %>"> 
         <div class="form-group">
-          <label for="fileUpload">Choisir un fichier à uploader :</label>
+          <label for="fileUpload">Choose a file to upload:</label>
           <input type="file" name="fileUpload" class="form-control" required>
         </div>
-        <button type="submit" class="btn btn-primary">Uploader</button>
+        <button type="submit" class="btn btn-primary">Upload</button>
     </form>      
 
     <!-- Formulaire pour créer un nouveau dossier -->
-    <h3>Créer un dossier</h3>
+    <h3>Create a folder</h3>
     <form action="<%= config.adminPath %>/create-folder" method="POST">
         <!-- Transmettre le chemin complet du sous-dossier -->
         <input type="hidden" name="currentFolder" value="<%= currentFolder %>"> 
         <div class="form-group">
-          <label for="folderName">Nom du nouveau dossier :</label>
+          <label for="folderName">New folder name:</label>
           <input type="text" name="folderName" class="form-control" required>
         </div>
         <button type="submit" class="btn btn-success">Créer</button>
@@ -43,7 +43,7 @@
     <hr>
 
     <!-- Liste des dossiers -->
-    <h3>Dossiers</h3>
+    <h3>FOlders</h3>
     <ul class="list-group">
       <% directories.forEach(function(directory) { %>
         <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -61,14 +61,14 @@
               <input type="hidden" name="currentFolder" value="<%= currentFolder %>">
               <input type="hidden" name="oldFolderName" value="<%= directory %>">
               <input type="text" name="newFolderName" placeholder="Nouveau nom" class="form-control-sm" required>
-              <button type="submit" class="btn btn-primary btn-sm">Renommer</button>
+              <button type="submit" class="btn btn-primary btn-sm">Rename</button>
             </form>
 
             <!-- Formulaire pour supprimer un dossier -->
             <form action="<%= config.adminPath %>/delete-folder" method="POST" class="d-inline" onsubmit="confirmDelete(event, 'folder')">
               <input type="hidden" name="currentFolder" value="<%= currentFolder %>">
               <input type="hidden" name="folderName" value="<%= directory %>">
-              <button type="submit" class="btn btn-danger btn-sm">Supprimer</button>
+              <button type="submit" class="btn btn-danger btn-sm">Delete</button>
             </form>
           </div>
         </li>
@@ -78,7 +78,7 @@
     <hr>
 
     <!-- Liste des fichiers -->
-    <h3>Fichiers</h3>
+    <h3>Files</h3>
     <ul class="list-group">
       <% fileList.forEach(function(file) { %>
         <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -92,14 +92,14 @@
               <input type="hidden" name="currentFolder" value="<%= currentFolder %>">
               <input type="hidden" name="oldFileName" value="<%= file %>">
               <input type="text" name="newFileName" placeholder="Nouveau nom" class="form-control-sm" required>
-              <button type="submit" class="btn btn-primary btn-sm">Renommer</button>
+              <button type="submit" class="btn btn-primary btn-sm">Rename</button>
             </form>
 
             <!-- Formulaire pour supprimer un fichier -->
             <form action="<%= config.adminPath %>/delete-file" method="POST" class="d-inline" onsubmit="confirmDelete(event, 'file')">
               <input type="hidden" name="currentFolder" value="<%= currentFolder %>">
               <input type="hidden" name="fileName" value="<%= file %>">
-              <button type="submit" class="btn btn-danger btn-sm">Supprimer</button>
+              <button type="submit" class="btn btn-danger btn-sm">Delete</button>
             </form>
           </div>
         </li>
@@ -111,7 +111,7 @@
     function confirmDelete(event, type) {
       event.preventDefault();
       const name = event.target.querySelector('input[name="folderName"], input[name="fileName"]').value;
-      const confirmMessage = `Êtes-vous sûr de vouloir supprimer ${type === 'folder' ? 'le dossier' : 'le fichier'} "${name}" ?`;
+      const confirmMessage = `Are you sure you want to delete ${type === 'folder' ? 'this folder' : 'this file'} "${name}" ?`;
       if (confirm(confirmMessage)) {
         event.target.submit();
       }

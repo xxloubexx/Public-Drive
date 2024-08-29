@@ -44,7 +44,7 @@ async function handleAdminRoot(req, res) {
     const { directories, fileList } = await getDirectoryContents(folderPath);
     res.render('admin', { currentFolder: '', directories, fileList, config });
   } catch (err) {
-    res.status(500).send('Erreur lors de la lecture du dossier');
+    res.status(500).send('Error when reading the folder');
   }
 }
 
@@ -55,7 +55,7 @@ async function handleFolderView(req, res) {
     const { directories, fileList } = await getDirectoryContents(folderPath);
     res.render('admin', { currentFolder: folderName, directories, fileList, config });
   } catch (err) {
-    res.status(500).send('Erreur lors de la lecture du dossier');
+    res.status(500).send('Error when reading the folder');
   }
 }
 
@@ -95,8 +95,8 @@ async function handleRenameFile(req, res) {
     console.log(`Fichier renommé de "${oldFileName}" à "${finalNewFileName}"`);
     redirectToFolder(res, currentFolder);
   } catch (error) {
-    console.error('Erreur lors du renommage du fichier:', error);
-    res.status(500).send('Erreur lors du renommage du fichier');
+    console.error('Error when renaming the file:', error);
+    res.status(500).send('Error when renaming the file');
   }
 }
 
@@ -110,9 +110,9 @@ async function handleDeleteFile(req, res) {
 function handleFileUpload(req, res) {
   const currentFolder = req.body.currentFolder || '';
   if (!req.file) {
-    return res.status(400).send('Erreur lors de l\'upload du fichier.');
+    return res.status(400).send('Error during the upload of the file.');
   }
-  console.log('Fichier uploadé avec succès :', req.file.originalname, 'dans le dossier', currentFolder);
+  console.log('Successfully uploaded file :', req.file.originalname, 'in the folder', currentFolder);
   redirectToFolder(res, currentFolder);
 }
 

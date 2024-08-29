@@ -37,7 +37,7 @@ app.get('/', async (req, res) => {
     const { directories, fileList } = await getDirectoryContents(publicDir);
     res.render('index', { directories, fileList, adminPath });
   } catch (err) {
-    res.status(500).send('Erreur lors de la lecture du dossier');
+    res.status(500).send('Error when reading the folder');
   }
 });
 
@@ -49,7 +49,7 @@ app.get('/folder/:folderName*', async (req, res) => {
     const { directories, fileList } = await getDirectoryContents(folderPath);
     res.render('folder', { folderName, directories, fileList, adminPath });
   } catch (err) {
-    res.status(500).send('Erreur lors de la lecture du dossier');
+    res.status(500).send('Error when reading the folder');
   }
 });
 
@@ -58,7 +58,7 @@ async function handleFileRequest(req, res, filePath, folderName) {
   const fileName = path.basename(filePath);
 
   if (!await fs.access(filePath).then(() => true).catch(() => false)) {
-    return res.status(404).send('Fichier non trouvé');
+    return res.status(404).send('File not found');
   }
 
   if (mimeType === 'application/pdf') {
@@ -80,7 +80,7 @@ app.get('/folder/:folderName*', async (req, res) => {
     const { directories, fileList } = await getDirectoryContents(folderPath);
     res.render('folder', { folderName, directories, fileList, adminPath });
   } catch (err) {
-    res.status(500).send('Erreur lors de la lecture du dossier');
+    res.status(500).send('Error when reading the file');
   }
 });
 
@@ -100,8 +100,8 @@ app.get('/api/search', async (req, res) => {
     const resultFiles = await searchInDirectory(publicDir, query, searchType, folder);
     res.json({ files: resultFiles });
   } catch (err) {
-    console.error('Erreur lors de la recherche:', err);
-    res.status(500).json({ error: 'Erreur lors de la recherche' });
+    console.error('Error during research:', err);
+    res.status(500).json({ error: 'Error during research' });
   }
 });
 
@@ -131,7 +131,7 @@ async function searchInDirectory(dirPath, query, searchType, folder = '') {
               resultFiles.push(path.join(folder, relativePath));
             }
           } catch (error) {
-            console.error(`Erreur lors de la lecture du fichier ${itemPath}:`, error);
+            console.error(`Error when reading the file ${itemPath}:`, error);
           }
         }
       }
@@ -147,5 +147,5 @@ async function searchInDirectory(dirPath, query, searchType, folder = '') {
 require('./adminRoutes')(app, adminPath);
 
 app.listen(PORT, () => {
-  console.log(`Serveur démarré sur le port ${PORT}. Accédez à http://localhost:${PORT}`);
+  console.log(`Server started on the port ${PORT}. Access to http://localhost:${PORT}`);
 });
