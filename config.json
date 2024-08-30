@@ -1,5 +1,10 @@
 {
     "port": 3000,
-    "adminPath": "/modify"
+    "adminPath": "/modify",
+    "excludedFiles": [
+      "*.exe",
+      "config.json",
+      ".gitignore"
+    ]
   }
   
