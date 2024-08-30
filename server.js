@@ -24,8 +24,8 @@ async function getDirectoryContents(dirPath) {
     const stat = await fs.stat(filePath);
     if (stat.isDirectory()) {
       directories.push(file);
-    } else if (stat.isFile()) {
-      fileList.push(file);
+    } else if (stat.isFile() && !isFileExcluded(file, config.excludedFiles)) {
+        fileList.push(file);
     }
   }
 
@@ -56,8 +56,8 @@ app.get('/folder/:folderName*', async (req, res) => {
 async function handleFileRequest(req, res, filePath, folderName) {
   const mimeType = mime.lookup(filePath);
   const fileName = path.basename(filePath);
-
-  if (!await fs.access(filePath).then(() => true).catch(() => false)) {
+  
+  if (isFileExcluded(fileName, config.excludedFiles) || !await fs.access(filePath).then(() => true).catch(() => false)) {
     return res.status(404).send('File not found');
   }
 
@@ -72,22 +72,11 @@ async function handleFileRequest(req, res, filePath, folderName) {
   }
 }
 
-app.get('/folder/:folderName*', async (req, res) => {
-  const folderName = req.params.folderName + (req.params[0] || '');
-  const folderPath = path.join(publicDir, folderName);
-
-  try {
-    const { directories, fileList } = await getDirectoryContents(folderPath);
-    res.render('folder', { folderName, directories, fileList, adminPath });
-  } catch (err) {
-    res.status(500).send('Error when reading the file');
-  }
-});
-
 app.get('/file/*', (req, res) => {
   const fullPath = req.params[0];
   const filePath = path.join(publicDir, fullPath);
   const folderName = path.dirname(fullPath);
+
   handleFileRequest(req, res, filePath, folderName);
 });
 
@@ -122,6 +111,8 @@ async function searchInDirectory(dirPath, query, searchType, folder = '') {
         const fileName = item.toLowerCase();
         const relativePath = path.relative(startPath, itemPath).replace(/\\/g, '/');
 
+        if (isFileExcluded(fileName, config.excludedFiles)) return;
+
         if (searchType === 'filename' && fileName.includes(query)) {
           resultFiles.push(path.join(folder, relativePath));
         } else if (searchType === 'content' && path.extname(fileName) === '.txt') {
@@ -142,10 +133,25 @@ async function searchInDirectory(dirPath, query, searchType, folder = '') {
   return resultFiles;
 }
 
+function isFileExcluded(fileName, excludedFiles) {
+  console.log(fileName)
+  console.log(excludedFiles)
+  return excludedFiles.some(excludedPattern => {
+    if (excludedPattern.startsWith('*')) {
+      const extension = excludedPattern.slice(1).toLowerCase();
+      return fileName.endsWith(extension);
+    }
+    return fileName === excludedPattern.toLowerCase();
+  });
+}
 
+module.exports = { isFileExcluded };
 
 require('./adminRoutes')(app, adminPath);
+
 
 app.listen(PORT, () => {
   console.log(`Server started on the port ${PORT}. Access to http://localhost:${PORT}`);
 });
+
+
