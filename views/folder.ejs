@@ -56,7 +56,7 @@
       <ul class="list-group">
         <% fileList.forEach(function(file) { %>
           <li class="list-group-item">
-            <a href="/file/<%= folderName %>/<%= file %>">📄 <%= file %></a>
+            <a href="/file/<%= folderName ? folderName + '/' : '' %><%= file %>"><%= file %></a>
           </li>
         <% }); %>
       </ul>

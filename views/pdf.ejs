@@ -43,7 +43,7 @@
     </div>
 
     <!-- PDF occupe tout l'espace restant -->
-    <iframe class="pdf-viewer" src="/<%= folderName %>/<%= fileName %>"></iframe>
+    <iframe class="pdf-viewer" src="/<%= folderName ? folderName + '/' : '' %><%= fileName %>"</iframe>
   </div>
 </body>
 </html>

@@ -43,7 +43,7 @@
     </div>
 
     <!-- Texte occupe tout l'espace restant -->
-    <iframe class="txt-viewer" src="/<%= folderName %>/<%= fileName %>"></iframe>
+    <iframe class="txt-viewer" src="/<%= folderName ? folderName + '/' : '' %><%= fileName %>"</iframe>
   </div>
 </body>
 </html>

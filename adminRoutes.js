@@ -4,7 +4,7 @@ const fs = require('fs').promises;
 const config = require('./config.json');
 const adminPath = config.adminPath;
 
-const { isFileExcluded } = require('./server');
+const { isFileExcluded } = require('./utils');
 
 const storage = multer.diskStorage({
   destination: async (req, file, cb) => {
@@ -51,9 +51,8 @@ async function handleAdminRoot(req, res) {
   }
 }
 
-async function handleFolderView(req, res) {
+async function handleFolderView(req, res, folderName) {
   try {
-    const folderName = req.params.folderName + (req.params[0] || '');
     const folderPath = path.join(__dirname, 'public', folderName);
     const { directories, fileList } = await getDirectoryContents(folderPath);
     res.render('admin', { currentFolder: folderName, directories, fileList, config });
@@ -147,7 +146,10 @@ function handleFileUpload(req, res) {
 
 module.exports = function (app) {
   app.get(`${adminPath}`, handleAdminRoot);
-  app.get(`${adminPath}/folder/:folderName*`, handleFolderView);
+  app.get(`${adminPath}/folder/:path(*)`, (req, res) => {
+    const folderName = req.params.path || '';
+    handleFolderView(req, res, folderName);
+  });
   app.post(`${adminPath}/create-folder`, handleCreateFolder);
   app.post(`${adminPath}/delete-folder`, handleDeleteFolder);
   app.post(`${adminPath}/rename-folder`, handleRenameFolder);
