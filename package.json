@@ -23,6 +23,7 @@
     "mime-types": "^3.0.1",
     "multer": "^2.0.2",
     "path-to-regexp": "^8.2.0",
-    "pdfkit": "^0.17.1"
+    "pdfkit": "^0.17.1",
+    "@fastify/rate-limit": "^10.3.0"
   }
 }

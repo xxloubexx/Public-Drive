@@ -1,3 +1,4 @@
+const rateLimit = require('@fastify/rate-limit');
 const fastify = require('fastify')({ logger: true });
 const path = require('path');
 const fs = require('fs').promises;
@@ -8,6 +9,12 @@ const util = require('util');
 const stream = require('stream');
 const pipeline = util.promisify(stream.pipeline);
 const { setTimeout } = require('timers/promises');
+
+// Register rate limiter
+fastify.register(rateLimit, {
+  max: 100, // Limit each IP to 100 requests per 15 minutes
+  timeWindow: '15 minutes'
+});
 
 // Static files
 fastify.register(require('@fastify/static'), {
@@ -297,7 +304,7 @@ fastify.post(`${config.adminPath}/delete-file`, async (req, reply) => {
 });
 
 // Upload de fichier (déjà présent, mais sécurisé)
-fastify.post(`${config.adminPath}/upload-file`, async (req, reply) => {
+fastify.post(`${config.adminPath}/upload-file`, { config: { rateLimit: { max: 10, timeWindow: '1 minute' } } }, async (req, reply) => {
   fastify.log.info('Début upload');
   const parts = req.parts();
   let currentFolder = '';
