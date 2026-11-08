@@ -9,6 +9,20 @@ const stream = require('stream');
 const pipeline = util.promisify(stream.pipeline);
 const { setTimeout } = require('timers/promises');
 
+const PUBLIC_DIR = path.join(__dirname, 'public');
+
+// Resolve a user-supplied path inside public/, or null if it escapes (path traversal).
+function safePath(rel) {
+  const p = path.resolve(PUBLIC_DIR, String(rel || ''));
+  return p === PUBLIC_DIR || p.startsWith(PUBLIC_DIR + path.sep) ? p : null;
+}
+
+// Per-IP limit on every route; search is debounced client-side so humans stay far below it.
+// Applied as a root hook because routes below are declared before the plugin finishes loading.
+fastify.register(require('@fastify/rate-limit'), { global: false, max: 300, timeWindow: '1 minute' });
+let limiter;
+fastify.addHook('onRequest', (req, reply) => (limiter ??= fastify.rateLimit())(req, reply));
+
 // Static files
 fastify.register(require('@fastify/static'), {
   root: path.join(__dirname, 'public'),
@@ -63,7 +77,8 @@ fastify.get('/', async (req, reply) => {
 // Folder view
 fastify.get('/folder/*', async (req, reply) => {
   const folderName = req.params['*'] || '';
-  const folderPath = path.join(__dirname, 'public', folderName);
+  const folderPath = safePath(folderName);
+  if (!folderPath) return reply.code(404).send('Folder not found');
 
   try {
     const { directories, fileList } = await getDirectoryContents(folderPath);
@@ -76,7 +91,8 @@ fastify.get('/folder/*', async (req, reply) => {
 // File view (PDF, TXT, other)
 fastify.get('/file/*', async (req, reply) => {
   const fullPath = req.params['*'];
-  const filePath = path.join(__dirname, 'public', fullPath);
+  const filePath = safePath(fullPath);
+  if (!filePath) return reply.code(404).send('File not found');
   const folderName = path.dirname(fullPath);
   const mime = require('mime-types');
   const mimeType = mime.lookup(filePath);
@@ -106,17 +122,18 @@ fastify.get('/api/search', async (req, reply) => {
   const query = (req.query.query || '').toLowerCase();
   const searchType = req.query.searchType;
   const folder = req.query.folder || '';
+  const startPath = safePath(folder);
+  if (!startPath) return reply.code(400).send({ error: 'Invalid folder' });
   try {
-    const resultFiles = await searchInDirectory(path.join(__dirname, 'public'), query, searchType, folder);
+    const resultFiles = await searchInDirectory(startPath, query, searchType, folder);
     return reply.send({ files: resultFiles });
   } catch (err) {
     reply.code(500).send({ error: 'Error during research' });
   }
 });
 
-async function searchInDirectory(dirPath, query, searchType, folder = '') {
+async function searchInDirectory(startPath, query, searchType, folder = '') {
   const resultFiles = [];
-  const startPath = path.join(dirPath, folder);
 
   async function searchRecursive(currentPath) {
     const items = await fs.readdir(currentPath);
@@ -171,7 +188,8 @@ fastify.get(config.adminPath, async (req, reply) => {
 // Route admin sous-dossier
 fastify.get(`${config.adminPath}/folder/*`, async (req, reply) => {
   const folderName = req.params['*'] || '';
-  const folderPath = path.join(__dirname, 'public', folderName);
+  const folderPath = safePath(folderName);
+  if (!folderPath) return reply.code(404).send('Folder not found');
 
   try {
     const { directories, fileList } = await getDirectoryContents(folderPath);

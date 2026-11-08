@@ -76,6 +76,14 @@ test('searches by filename and content', async () => {
     }
 });
 
+test('blocks path traversal outside public/', async () => {
+    for (const url of ['/file/..%2Fserver.js', '/folder/..%2F..', `${adminPath}/folder/..%2F..`]) {
+        assert.strictEqual((await fetch(BASE + url)).status, 404, url);
+    }
+    const res = await fetch(`${BASE}/api/search?query=server&searchType=filename&folder=..`);
+    assert.strictEqual(res.status, 400);
+});
+
 test('renames and deletes a file', async () => {
     await form('/rename-file', { oldFileName: 'hello.txt', newFileName: 'bye', currentFolder: DIR });
     assert.ok(fs.existsSync(path.join(PUBLIC, DIR, 'bye.txt')), 'keeps extension');
@@ -91,4 +99,11 @@ test('renames and deletes a folder, never the root', async () => {
     assert.strictEqual((await form('/delete-folder', { folderName: '' })).status, 400);
     await form('/delete-folder', { folderName: DIR2 });
     assert.ok(!fs.existsSync(path.join(PUBLIC, DIR2)));
+});
+
+// Must stay last: it exhausts the per-IP quota for the rest of the run.
+test('rate limits floods', async () => {
+    let status;
+    for (let i = 0; i < 400 && status !== 429; i++) status = (await fetch(BASE + '/')).status;
+    assert.strictEqual(status, 429);
 });
