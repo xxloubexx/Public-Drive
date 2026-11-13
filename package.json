@@ -21,7 +21,7 @@
     "fastify": "^5.12.8",
     "glob": "^14.0.4",
     "mammoth": "^1.13.0",
-    "mime-types": "^3.0.1",
+    "mime-types": "^3.0.2",
     "multer": "^2.5.0",
     "path-to-regexp": "^9.0.0",
     "pdfkit": "^0.20.2"
