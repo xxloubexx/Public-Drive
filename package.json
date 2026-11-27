@@ -24,6 +24,6 @@
     "mime-types": "^3.0.2",
     "multer": "^2.5.0",
     "path-to-regexp": "^9.0.0",
-    "pdfkit": "^0.20.2"
+    "pdfkit": "^0.21.0"
   }
 }
